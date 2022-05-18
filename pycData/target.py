@@ -1,3 +1,3 @@
-a = 1
-b = 2
-c = 1 + b
+a = 'string1'
+b = 'string2'
+print(a)
