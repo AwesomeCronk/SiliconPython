@@ -1,4 +1,4 @@
 __pycache__
 *.pyc
-pycData/opcodes.txt
-pycData/target.dis
+opcodes.txt
+*.dis

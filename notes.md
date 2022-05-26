@@ -15,3 +15,12 @@
     * `co_nlocals`
     * `co_stacksize`
     * `co_varnames`
+
+# Custom serialization
+Will support the same types as marshal
+Supported types:
+* code object
+* int
+* str
+* float
+* 
