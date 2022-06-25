@@ -41,6 +41,52 @@ def getArgs(argv=sys.argv[1:]):
     )
     return parser.parse_args(argv)
 
+def serialize(object):
+    objects = []
+    binary = b''
+
+    class pointer():
+        def __init__(self, value): assert value < 256 ** 4; self.value = value
+
+    def addObject(object):
+        nonlocal objects
+        nonlocal binary
+        address = len(objects)
+
+        if isinstance(object, pointer):
+            pointerBinary = int.to_bytes(object.value, 4, 'big')
+            binary += pointerBinary
+
+        elif isinstance(object, types.CodeType):
+            # Generate a byte string to represent the object, appending any references to other objects to `objects`
+            codeAttrs = []
+            
+            codeAttrs.append(object.co_name.encode())
+            codeAttrs.append(object.co_filename.encode())
+
+            codeAttrAddrs = [b'\x00\x00\x00\x00'] * len(codeAttrs)
+            # binary needs to be the address block followed by the content
+
+        elif isinstance(object, int):
+            size = 4
+            while 256 ** size <= abs(object) * 2: size += 4
+            if size >= 256 ** 4: raise ValueError('Object of type \'int\' is too big')
+
+        elif isinstance(object, str):
+            strBinary = object.encode('utf-8')
+            strBinary = b'\x00' * (4 - (len(strBinary) % 4)) + strBinary
+            strBinary = int.to_bytes(len(strBinary), 4, 'big') + strBinary
+
+            binary += strBinary
+        
+        else:
+            raise TypeError('Unsupported type {}'.format(type(object)))
+
+        return address
+
+    addObject(object) # Begin the recursive serialization process
+    return binary
+
 def main():
     args = getArgs()
     if args.file.split('.')[-1] != 'py': raise ValueError('<file> should end in ".py".')
@@ -77,55 +123,10 @@ def main():
     }
 
     if args.attributes:
-        print('Program attributes:\n' + '\n'.join(['{}: {}'.format(key, attributes[key]) for key in attributes.keys()]))
+        print('Program attributes:\n' + '\n'.join(['{}: {}'.format(key, attributes[key]) for key in attributes.keys()]))    
 
-    colors = {
-        'co_argcount':      (0, 0, 100),
-        'co_posonlyargcount': (0, 50, 75),
-        'co_kwonlyargcount': (0, 75, 50),
-        'co_nlocals':       (0, 75, 0),
-        'co_codelen':       (128, 0, 0),
-        'co_code':          (200, 20, 20),
-        'co_consts':        (20, 100, 0),
-        'co_filename':      (0, 0, 0),
-        'co_firstlineno':   (0, 0, 0),
-        'co_flags':         (0, 0, 0),
-        'co_name':          (150, 75, 0),
-        'co_names':         (0, 0, 0),
-        'co_stacksize':     (0, 0, 0),
-        'co_varnames':      (0, 0, 0)
-    }
 
-    addrs = {}
-    addrs['co_argcount']        = 0x11
-    addrs['co_posonlyargcount'] = 0x15
-    addrs['co_kwonlyargcount']  = 0x19
-    addrs['co_nlocals']         = 0x1d
-    addrs['co_stacksize']       = 0x21
-    addrs['co_flags']           = 0x25
-    addrs['co_codelen']         = 0x2a
-    addrs['co_code']            = 0x2e
-    # addrs['co_consts']          = addrs['co_code'] + int.from_bytes(pycBinary[addrs['co_codelen']:addrs['co_codelen'] + 4], 'little')
-    
-    ## Serialize things (this is where it gets complicated)
-
-    objects = []
-    def addObject(object):
-        nonlocal objects
-        if isinstance(object, types.CodeType):
-            # Generate a byte string to represent the object, appending any references to other objects to `objects`
-            codeAttrs = []
-            
-            codeAttrs.append(object.co_name.encode())
-            codeAttrs.append(object.co_filename.encode())
-
-            codeAttrAddrs = [b'\x00\x00\x00\x00'] * len(codeAttrs)
-            # binary needs to be the address block followed by the content
-
-        elif isinstance(object, int):
-            pass
-
-    addObject(code) # Begin the recursive serialization process
+    serialize(code)
 
     if args.hexdump:
         # print(subprocess.run(['hexdump', '-C', args.file + 'c'], capture_output=True).stdout.decode(), end='')
