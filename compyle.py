@@ -42,20 +42,22 @@ def getArgs(argv=sys.argv[1:]):
     return parser.parse_args(argv)
 
 def serialize(object):
-    objects = []
+    # objects = []
     binary = b''
 
     class pointer():
         def __init__(self, value): assert value < 256 ** 4; self.value = value
 
     def addObject(object):
-        nonlocal objects
+        # nonlocal objects
         nonlocal binary
-        address = len(objects)
 
         if isinstance(object, pointer):
             pointerBinary = int.to_bytes(object.value, 4, 'big')
+
+            address = len(binary)
             binary += pointerBinary
+            print('Serialized {} at address {}'.format(pointer, address))
 
         elif isinstance(object, types.CodeType):
             # Generate a byte string to represent the object, appending any references to other objects to `objects`
@@ -67,20 +69,46 @@ def serialize(object):
             codeAttrAddrs = [b'\x00\x00\x00\x00'] * len(codeAttrs)
             # binary needs to be the address block followed by the content
 
+            address = len(binary)
+            binary += codeBinary
+            print('Serialized {} at address {}'.format(types.CodeType, address))
+
         elif isinstance(object, int):
             size = 4
             while 256 ** size <= abs(object) * 2: size += 4
-            if size >= 256 ** 4: raise ValueError('Object of type \'int\' is too big')
+            if size >= 256 ** 4: raise ValueError('Object of type \'int\' is too big')  # Raise error if the size of the int can't be represented in 4 bytes
+
+            cap = 256 ** size
+            compliment = (cap + abs(object)) % cap
+            intBinary = int.to_bytes(compliment, size, 'big')
+
+            address = len(binary)
+            binary += intBinary
+            print('Serialized {} at address {}'.format(int, address))
 
         elif isinstance(object, str):
             strBinary = object.encode('utf-8')
+            if len(strBinary) >= 256 ** 4: raise ValueError('Object of type \'str\' is too big')
             strBinary = b'\x00' * (4 - (len(strBinary) % 4)) + strBinary
             strBinary = int.to_bytes(len(strBinary), 4, 'big') + strBinary
 
+            address = len(binary)
             binary += strBinary
+            print('Serialized {} at address {}'.format(str, address))
         
+        elif isinstance(object, tuple):
+            if len(object) >= 256 ** 4: raise ValueError('Object of type \'tuple\' is too big')
+            tupleBinary = int.to_bytes(len(object), 4, 'big')
+            for item in object:
+                itemAddress = addObject(item)
+                tupleBinary += int.to_bytes(itemAddress, 4, 'big')
+
+            address = len(binary)
+            binary += tupleBinary
+            print('Serialized {} at address {}'.format(tuple, address))
+
         else:
-            raise TypeError('Unsupported type {}'.format(type(object)))
+            raise TypeError('Unsupported type:', type(object))
 
         return address
 

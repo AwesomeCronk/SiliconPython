@@ -18,9 +18,14 @@
 
 # Custom serialization
 Will support the same types as marshal
-Supported types:
-* code object
+Supported types (italics indicate not implimented):
+* compyle.serialize.pointer
+* *code object*
 * int
+* *float*
 * str
-* float
-* 
+* *bytes*
+* *bool*
+* *tuple*
+* *list*
+* *dict*
