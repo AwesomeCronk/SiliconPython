@@ -210,41 +210,20 @@ def main():
 
         chars = "................................ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~................................................................................................................................."
         disp = 'Hexdump of .pyc:\n'
-        # if args.color:
-        #     disp += ansi.graphics.setGraphicsMode(ansi.graphics.bgColor, ansi.graphics.mode16Bit, 0, 0, 0)
-        #     currentColor = (0, 0, 0)
         addr = 0
         while True:
             line = binary[addr:addr + 16]
             text = ''
             disp += hex(addr)[2:].zfill(8) + '  '
-            if line == b'':
-                break
+            if line == b'': break
 
-            # if args.color:
-            #     disp += ansi.graphics.setGraphicsMode(ansi.graphics.bgColor, ansi.graphics.mode16Bit, *currentColor)
-                
-            for b, byte in enumerate(line):   # Note that byte is an int when you do this
-                # if args.color:
-                #     if addr + b in addrs.values():
-                #         for key in addrs.keys():
-                #             if addrs[key] == addr + b: break
-                #         currentColor = colors[key]
-                #         disp += ansi.graphics.setGraphicsMode(ansi.graphics.bgColor, ansi.graphics.mode16Bit, *currentColor)
-
+            for b, byte in enumerate(line):   # Note that byte is an int when you iterate bytes
                 disp += hex(byte)[2:].zfill(2) + ' '
                 text += chars[byte]
-                if b == 7:
-                    disp += ' '
+                if b == 7: disp += ' '
 
-            if b < 8:
-                disp += ' '
-
-            for i in range(15 - b):
-                disp += '   '
-
-            # if args.color:
-            #     disp += ansi.graphics.setGraphicsMode(ansi.graphics.bgColor, ansi.graphics.mode16Bit, 0, 0, 0)
+            if b < 8: disp += ' '
+            for i in range(15 - b): disp += '   '
             disp += ' |' + text + '|\n'
             addr += 16
         disp += '\n'
