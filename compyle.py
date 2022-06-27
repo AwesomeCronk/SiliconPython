@@ -1,6 +1,10 @@
+import argparse, logging, sys
+from types import CodeType
 from dis import dis
-import argparse, sys, types
-import simpleANSI as ansi
+
+
+NoneType = type(None)
+
 
 def getArgs(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser()
@@ -33,50 +37,84 @@ def getArgs(argv=sys.argv[1:]):
         action='store_true',
         help='hexdump the compiled program'
     )
-    parser.add_argument(
-        '--color',
-        '-c',
-        action='store_true',
-        help='color in different components in the hexdump (will be skipped if -x is not specified)'
-    )
+    # parser.add_argument(
+    #     '--color',
+    #     '-c',
+    #     action='store_true',
+    #     help='color in different components in the hexdump (will be skipped if -x is not specified)'
+    # )
     return parser.parse_args(argv)
 
 def serialize(object):
-    # objects = []
+    typeIDs = [
+        # Pointers have no type because they are not Python objects
+        # They only exist when explicitly needed to facilitate more complex objects
+        # pointer,
+        CodeType,
+        int,
+        float,
+        str,
+        bytes,
+        bool,
+        tuple,
+        list,
+        dict,
+        NoneType
+    ]
     binary = b''
+
+    # Logging setup
+    logger = logging.getLogger('serialize')
+    logger.setLevel(logging.DEBUG)
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('[%(levelname)s] %(name)s: %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
     class pointer():
         def __init__(self, value): assert value < 256 ** 4; self.value = value
+
+    def editPointer(address, target):
+        nonlocal binary
+        binary = binary[0:address] + int.to_bytes(target, 4, 'big') + binary[address + 4:]
 
     def addObject(object):
         # nonlocal objects
         nonlocal binary
 
-        if isinstance(object, pointer):
+        if isinstance(object, pointer):     # Complete
             pointerBinary = int.to_bytes(object.value, 4, 'big')
 
             address = len(binary)
             binary += pointerBinary
-            print('Serialized {} at address {}'.format(pointer, address))
+            logger.info('Serialized {} at address 0x{:02X}'.format(pointer, address))
 
-        elif isinstance(object, types.CodeType):
+        elif isinstance(object, CodeType):
             # Generate a byte string to represent the object, appending any references to other objects to `objects`
-            codeAttrs = []
-            
-            codeAttrs.append(object.co_name.encode())
-            codeAttrs.append(object.co_filename.encode())
-
-            codeAttrAddrs = [b'\x00\x00\x00\x00'] * len(codeAttrs)
-            # binary needs to be the address block followed by the content
-
             address = len(binary)
-            binary += codeBinary
-            print('Serialized {} at address {}'.format(types.CodeType, address))
+            codeBinaryHeader = int.to_bytes(typeIDs.index(CodeType), 1, 'big') + b'spy'
+            binary += codeBinaryHeader
 
-        elif isinstance(object, int):
+            codePointer = addObject(pointer(0))
+            namesPointer = addObject(pointer(0))
+            constantsPointer = addObject(pointer(0))
+            namePointer = addObject(pointer(0))
+            filenamePointer = addObject(pointer(0))
+            
+            editPointer(codePointer, len(binary))
+            binary += object.co_code
+            editPointer(namesPointer, addObject(object.co_names))
+            editPointer(constantsPointer, addObject(object.co_consts))
+            editPointer(namePointer, addObject(object.co_name))
+            editPointer(filenamePointer, addObject(object.co_filename))
+
+            logger.info('Serialized {} at address 0x{:02X}'.format(CodeType, address))
+
+        elif isinstance(object, int):       # Complete
             size = 4
             while 256 ** size <= abs(object) * 2: size += 4
-            if size >= 256 ** 4: raise ValueError('Object of type \'int\' is too big')  # Raise error if the size of the int can't be represented in 4 bytes
+            if size >= 256 ** 3: raise ValueError('Object of type \'int\' is too big')
 
             cap = 256 ** size
             compliment = (cap + abs(object)) % cap
@@ -84,20 +122,21 @@ def serialize(object):
 
             address = len(binary)
             binary += intBinary
-            print('Serialized {} at address {}'.format(int, address))
+            logger.info('Serialized {} at address 0x{:02X}'.format(int, address))
 
-        elif isinstance(object, str):
+        elif isinstance(object, str):       # Complete
             strBinary = object.encode('utf-8')
-            if len(strBinary) >= 256 ** 4: raise ValueError('Object of type \'str\' is too big')
-            strBinary = b'\x00' * (4 - (len(strBinary) % 4)) + strBinary
-            strBinary = int.to_bytes(len(strBinary), 4, 'big') + strBinary
+            length = len(strBinary)
+            if length >= 256 ** 4: raise ValueError('Object of type \'str\' is too big')
+            strBinary += b'\x00' * (4 - (length % 4))
+            strBinary = int.to_bytes(length, 4, 'big') + strBinary
 
             address = len(binary)
             binary += strBinary
-            print('Serialized {} at address {}'.format(str, address))
+            logger.info('Serialized {} at address 0x{:02X}'.format(str, address))
         
-        elif isinstance(object, tuple):
-            if len(object) >= 256 ** 4: raise ValueError('Object of type \'tuple\' is too big')
+        elif isinstance(object, tuple):     # Complete
+            if len(object) >= 256 ** 4: raise ValueError('Object of type {} is too big'.format(tuple))
             tupleBinary = int.to_bytes(len(object), 4, 'big')
             for item in object:
                 itemAddress = addObject(item)
@@ -105,10 +144,17 @@ def serialize(object):
 
             address = len(binary)
             binary += tupleBinary
-            print('Serialized {} at address {}'.format(tuple, address))
+            logger.info('Serialized {} at address 0x{:02X}'.format(tuple, address))
+
+        elif isinstance(object, NoneType):
+            noneBinary = b'None'
+
+            address = len(binary)
+            binary += noneBinary
+            logger.info('Serialized {} at address 0x{:02X}'.format(NoneType, address))
 
         else:
-            raise TypeError('Unsupported type:', type(object))
+            raise TypeError('Unsupported type: {}'.format(type(object)))
 
         return address
 
@@ -119,7 +165,7 @@ def main():
     args = getArgs()
     if args.file.split('.')[-1] != 'py': raise ValueError('<file> should end in ".py".')
     if args.out_file == '<default>': args.out_file = '.'.join(args.file.split('.')[0:-1] + ['spy'])
-    elif args.out_file.split('.') != 'spy': raise ValueError('<out-file> should end in ".spy".')
+    elif args.out_file.split('.')[-1] != 'spy': raise ValueError('<out-file> should end in ".spy".')
     
     print('Python {}'.format(sys.version))
     
@@ -154,34 +200,37 @@ def main():
         print('Program attributes:\n' + '\n'.join(['{}: {}'.format(key, attributes[key]) for key in attributes.keys()]))    
 
 
-    serialize(code)
+    binary = serialize(code)
+
+    with open(args.out_file, 'wb') as outFile:
+        outFile.write(binary)
 
     if args.hexdump:
         # print(subprocess.run(['hexdump', '-C', args.file + 'c'], capture_output=True).stdout.decode(), end='')
 
         chars = "................................ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~................................................................................................................................."
         disp = 'Hexdump of .pyc:\n'
-        if args.color:
-            disp += ansi.graphics.setGraphicsMode(ansi.graphics.bgColor, ansi.graphics.mode16Bit, 0, 0, 0)
-            currentColor = (0, 0, 0)
+        # if args.color:
+        #     disp += ansi.graphics.setGraphicsMode(ansi.graphics.bgColor, ansi.graphics.mode16Bit, 0, 0, 0)
+        #     currentColor = (0, 0, 0)
         addr = 0
         while True:
-            line = pycBinary[addr:addr + 16]
+            line = binary[addr:addr + 16]
             text = ''
             disp += hex(addr)[2:].zfill(8) + '  '
             if line == b'':
                 break
 
-            if args.color:
-                disp += ansi.graphics.setGraphicsMode(ansi.graphics.bgColor, ansi.graphics.mode16Bit, *currentColor)
+            # if args.color:
+            #     disp += ansi.graphics.setGraphicsMode(ansi.graphics.bgColor, ansi.graphics.mode16Bit, *currentColor)
                 
             for b, byte in enumerate(line):   # Note that byte is an int when you do this
-                if args.color:
-                    if addr + b in addrs.values():
-                        for key in addrs.keys():
-                            if addrs[key] == addr + b: break
-                        currentColor = colors[key]
-                        disp += ansi.graphics.setGraphicsMode(ansi.graphics.bgColor, ansi.graphics.mode16Bit, *currentColor)
+                # if args.color:
+                #     if addr + b in addrs.values():
+                #         for key in addrs.keys():
+                #             if addrs[key] == addr + b: break
+                #         currentColor = colors[key]
+                #         disp += ansi.graphics.setGraphicsMode(ansi.graphics.bgColor, ansi.graphics.mode16Bit, *currentColor)
 
                 disp += hex(byte)[2:].zfill(2) + ' '
                 text += chars[byte]
@@ -194,8 +243,8 @@ def main():
             for i in range(15 - b):
                 disp += '   '
 
-            if args.color:
-                disp += ansi.graphics.setGraphicsMode(ansi.graphics.bgColor, ansi.graphics.mode16Bit, 0, 0, 0)
+            # if args.color:
+            #     disp += ansi.graphics.setGraphicsMode(ansi.graphics.bgColor, ansi.graphics.mode16Bit, 0, 0, 0)
             disp += ' |' + text + '|\n'
             addr += 16
         disp += '\n'

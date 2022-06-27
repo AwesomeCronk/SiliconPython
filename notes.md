@@ -26,6 +26,6 @@ Supported types (italics indicate not implimented):
 * str
 * *bytes*
 * *bool*
-* *tuple*
+* tuple
 * *list*
 * *dict*
