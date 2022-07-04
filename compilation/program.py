@@ -1,5 +1,3 @@
-print("hello")
-def func():
-    print('funcky stuff')
-
-func()
+string = 'the string'
+for char in string:
+    print(char)
