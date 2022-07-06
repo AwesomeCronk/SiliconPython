@@ -1,21 +1,3 @@
-# .pyc structure
-* "Magic" number (`0x550d0d0a` for 3.8) (4B)
-* Bit field (All zeros)                 (4B)
-* Unix timestamp of modification time   (4B)
-* File size                             (4B)
-* A marshalled code object
-    * `co_argcount`
-    * `co_code`
-    * `co_consts`
-    * `co_filename`
-    * `co_firstlineno`
-    * `co_flags`
-    * `co_name`
-    * `co_names`
-    * `co_nlocals`
-    * `co_stacksize`
-    * `co_varnames`
-
 # Custom serialization
 Will support the same types as marshal
 Supported types (italics indicate not implimented):
@@ -35,7 +17,7 @@ To allocate memory, enable `Ctrl_Alloc` and output the desired size onto the bus
 
 ## MMU states
 Notes
-* `desired` and `available` always have comparison available as `blockComp`
+* `available` and `desired` always have greater/equal available as `sufficient`
 * `available` and `desired` always have difference available as `remaining`
 ### State 0 (idle)
 * unhold the CPU
@@ -50,7 +32,7 @@ Notes
 * copy `testing` to `previous`
 * copy `next` to `testing`
 * read memory address `testing` into `available`
-* if `blockComp` greater or equal then go to state 4, else go to state 3
+* if `sufficient` then go to state 4, else go to state 3
 ### State 3 (walk)
 * read memory address `testing` + 4 into `next`
 * go to state 2
@@ -58,6 +40,10 @@ Notes
 * write memory address `testing` + `desired` as `remaining`
 * read memory address `testing` + 4 into `next`
 * write memory address `testing` + `desired` + 4 as `next`
-* if `previous` equals 0 then go to state 0, else go to state 5
+* if `previous` equals `first` then go to state 6, else go to state 5
 ### State 5 (redirect previous block)
 * write memory address `previous` + 4 as `next`     // Make the last block point to the block after this one, instead of pointing to this one
+* go to state 0
+### State 6 (relocate first block)
+* read memory address `testing` + 4 into `first`
+* go to state 0
