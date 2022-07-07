@@ -10,22 +10,22 @@ lines = [
     'Previous_Out',
     'Testing_In',
     'Testing_Out',
-    'TestingPointer_Out',
+    'Split_Out',
     'Next_In',
     'Next_Out',
     'Memory_Address',
+    'Memory_AddressOffset',
     'Memory_Read',
     'Memory_Write',
-    'CPU_Hold',
-    'CPU_Unhold',
-    'Step_Reset',
+    'CPU_Enable',
+    '',
     'State_Set',
     'State_0',
     'State_1',
     'State_2'
 ]
 
-numConditions = 4
+numConditions = 8
 
 state_blank = [
     [],
@@ -39,13 +39,17 @@ state_blank = [
 ]
 
 state_idle = [
-    ['CPU_Unhold'],
     [
-        ['State_Set', 'Step_Reset'],
-        ['State_Set', 'State_0', 'Step_Reset'],
-        ['State_Set', 'Step_Reset'],
-        ['State_Set', 'State_0', 'Step_Reset']
+        ['CPU_Enable'],
+        ['State_Set', 'State_0'],
+        ['CPU_Enable'],
+        ['State_Set', 'State_0'],
+        ['CPU_Enable'],
+        ['State_Set', 'State_0'],
+        ['CPU_Enable'],
+        ['State_Set', 'State_0']
     ],
+    [],
     [],
     [],
     [],
@@ -55,11 +59,11 @@ state_idle = [
 ]
 
 state_init = [
-    ['CPU_Hold'],
     ['Desired_In'],
     ['First_Out', 'Next_In'],
     ['Testing_In'],     # Latches 0 since nothing is outputting
-    ['State_Set', 'State_1', 'Step_Reset'],
+    ['State_Set', 'State_1'],
+    [],
     [],
     [],
     []
@@ -71,10 +75,14 @@ state_compare = [
     ['Testing_Out', 'Memory_Address'],
     ['Memory_Read', 'Available_In'],
     [
-        ['State_Set', 'State_0', 'State_1', 'Step_Reset'],
-        ['State_Set', 'State_0', 'State_1', 'Step_Reset'],
-        ['State_Set', 'State_2', 'Step_Reset'],
-        ['State_Set', 'State_2', 'Step_Reset']
+        ['State_Set', 'State_0', 'State_1'],
+        ['State_Set', 'State_0', 'State_1'],
+        ['State_Set', 'State_0', 'State_1'],
+        ['State_Set', 'State_0', 'State_1'],
+        ['State_Set', 'State_2'],
+        ['State_Set', 'State_2'],
+        ['State_Set', 'State_2'],
+        ['State_Set', 'State_2']
     ],
     [],
     [],
@@ -82,9 +90,51 @@ state_compare = [
 ]
 
 state_walk = [
+    ['Testing_Out', 'Memory_AddressOffset'],
+    ['Memory_Read', 'Next_In'],
+    ['State_Set', 'State_1'],
     [],
     [],
     [],
+    [],
+    []
+]
+
+state_splitBlock = [
+    ['Split_Out', 'Memory_Address'],
+    ['Memory_Write', 'Remaining_Out'],
+    ['Testing_Out', 'Memory_AddressOffset'],
+    ['Memory_Read', 'Next_In'],
+    [
+        ['State_Set', 'State_0', 'State_2'],
+        ['State_Set', 'State_0', 'State_2'],
+        ['State_Set', 'State_1', 'State_2'],
+        ['State_Set', 'State_1', 'State_2'],
+        ['State_Set', 'State_0', 'State_2'],
+        ['State_Set', 'State_0', 'State_2'],
+        ['State_Set', 'State_1', 'State_2'],
+        ['State_Set', 'State_1', 'State_2']
+    ],
+    [],
+    [],
+    []
+]
+
+state_redirectPreviousBlock = [
+    ['Previous_Out', 'Memory_AddressOffset'],
+    ['Memory_Read', 'Next_In'],
+    ['State_Set'],
+    [],
+    [],
+    [],
+    [],
+    []
+]
+
+state_relocateFirstBlock = [
+    ['Testing_Out', 'Memory_AddressOffset'],
+    ['Memory_Read', 'First_In'],
+    ['State_Set'],
     [],
     [],
     [],
@@ -95,18 +145,19 @@ state_walk = [
 
 states = [
     state_idle,
-    state_blank,
-    state_blank,
-    state_blank,
-    state_blank,
-    state_blank,
-    state_blank,
+    state_init,
+    state_compare,
+    state_walk,
+    state_splitBlock,
+    state_redirectPreviousBlock,
+    state_relocateFirstBlock,
     state_blank
 ]
 
-assert len(lines) == 24
-assert len(states) == 2 ** 3
-for s, state in enumerate(states): print('Checking step count for state', s); assert len(state) == 2 ** 3
+if len(lines) != 24: print('Line count {} is incorrect'.format(len(lines))); exit()
+if len(states) != 2 ** 3: print('State count {} is incorrect'.format(len(states))); exit()
+for s, state in enumerate(states):
+    if len(state) != 2 ** 3: print('Step count {} for state {} is incorrect'.format(len(state), s)); exit()
 
 def encodeStep(step):
     bits = [0] * len(lines)
