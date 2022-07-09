@@ -19,6 +19,7 @@ To allocate memory, enable `Ctrl_Alloc` and output the desired size onto the bus
 Notes
 * `available` and `desired` always have greater/equal available as `sufficient`
 * `available` and `desired` always have difference available as `remaining`
+* `testing` and `desired` always have sum available as `split`
 ### State 0 (idle)
 * unhold the CPU
 * if `Ctrl_Alloc` active then go to state 1 else go to state 0
@@ -37,9 +38,9 @@ Notes
 * read memory address `testing` + 4 into `next`
 * go to state 2
 ### State 4 (split block)
-* write memory address `testing` + `desired` as `remaining`
+* write memory address `split` as `remaining`
 * read memory address `testing` + 4 into `next`
-* write memory address `testing` + `desired` + 4 as `next`
+* write memory address `split` + 4 as `next`
 * if `previous` equals `first` then go to state 6, else go to state 5
 ### State 5 (redirect previous block)
 * write memory address `previous` + 4 as `next`     // Make the last block point to the block after this one, instead of pointing to this one

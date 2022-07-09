@@ -3,6 +3,8 @@ from types import CodeType
 from dis import dis
 
 
+version = '0.1.0'
+
 NoneType = type(None)
 
 
@@ -167,7 +169,7 @@ def main():
     if args.out_file == '<default>': args.out_file = '.'.join(args.file.split('.')[0:-1] + ['spy'])
     elif args.out_file.split('.')[-1] != 'spy': raise ValueError('<out-file> should end in ".spy".')
     
-    print('Python {}'.format(sys.version))
+    print('Compyle {} on Python {}'.format(version, sys.version))
     
     with open(args.file, 'r') as file:
         source = file.read()
@@ -228,6 +230,15 @@ def main():
             addr += 16
         disp += '\n'
         print(disp)
+
+    units = ('B', 'kB', 'MB', 'GB', 'TB', 'PB')
+    selectedUnit = 0
+    count = len(binary)
+    while count >= 1024:
+        count /= 1024
+        selectedUnit += 1
+        if selectedUnit == len(units) - 1: break
+    else: print('Program size: {}{}'.format(round(count, 2), units[selectedUnit]))
 
 
 if __name__ == '__main__':

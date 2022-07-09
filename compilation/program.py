@@ -1,3 +1,3 @@
-string = 'the string'
-for char in string:
-    print(char)
+zilch = 0
+
+tup = (zilch, zilch)

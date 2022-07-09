@@ -40,13 +40,13 @@ state_blank = [
 
 state_idle = [
     [
-        ['CPU_Enable'],
+        ['CPU_Enable', 'State_Set'],
         ['State_Set', 'State_0'],
-        ['CPU_Enable'],
+        ['CPU_Enable', 'State_Set'],
         ['State_Set', 'State_0'],
-        ['CPU_Enable'],
+        ['CPU_Enable', 'State_Set'],
         ['State_Set', 'State_0'],
-        ['CPU_Enable'],
+        ['CPU_Enable', 'State_Set'],
         ['State_Set', 'State_0']
     ],
     [],
@@ -105,6 +105,8 @@ state_splitBlock = [
     ['Memory_Write', 'Remaining_Out'],
     ['Testing_Out', 'Memory_AddressOffset'],
     ['Memory_Read', 'Next_In'],
+    ['Split_Out', 'Memory_AddressOffset'],
+    ['Memory_Write', 'Next_Out'],
     [
         ['State_Set', 'State_0', 'State_2'],
         ['State_Set', 'State_0', 'State_2'],
@@ -115,8 +117,6 @@ state_splitBlock = [
         ['State_Set', 'State_1', 'State_2'],
         ['State_Set', 'State_1', 'State_2']
     ],
-    [],
-    [],
     []
 ]
 
