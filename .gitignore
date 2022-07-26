@@ -2,3 +2,7 @@ __pycache__
 *.pyc
 opcodes.txt
 *.dis
+compyle
+compyle.build
+compyle.dist
+corelibs/*.spy

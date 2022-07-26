@@ -15,33 +15,33 @@ def getArgs(argv=sys.argv[1:]):
         help='Python source file to disassemble'
     )
     parser.add_argument(
-        '--out-file',
         '-o',
+        '--out-file',
         action='store',
         default='<default>',
         help='file to output the compiled program to'
     )
     parser.add_argument(
-        '--attributes',
         '-a',
+        '--attributes',
         action='store_true',
         help='list attributes of the compiled program'
     )
     parser.add_argument(
-        '--disassemble',
         '-d',
+        '--disassemble',
         action='store_true',
         help='disassemble the compiled program'
     )
     parser.add_argument(
-        '--hexdump',
         '-x',
+        '--hexdump',
         action='store_true',
         help='hexdump the compiled program'
     )
     # parser.add_argument(
-    #     '--color',
     #     '-c',
+    #     '--color',
     #     action='store_true',
     #     help='color in different components in the hexdump (will be skipped if -x is not specified)'
     # )
@@ -208,8 +208,6 @@ def main():
         outFile.write(binary)
 
     if args.hexdump:
-        # print(subprocess.run(['hexdump', '-C', args.file + 'c'], capture_output=True).stdout.decode(), end='')
-
         chars = "................................ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~................................................................................................................................."
         disp = 'Hexdump of .pyc:\n'
         addr = 0
