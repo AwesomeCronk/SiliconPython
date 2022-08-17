@@ -1,16 +1,60 @@
 # Custom serialization
-Will support the same types as marshal
-Supported types (italics indicate not implimented):
-* compyle.serialize.pointer
-* *code object*
-* int
-* *float*
-* str
-* *bytes*
-* *bool*
-* tuple
-* *list*
-* *dict*
+All objects except `compyle.serialize.pointer`s (used internally by compyle) have a 4 byte header. The first byte is the object type index and the other three bytes are metadata for the object.
+
+Supported types are listed below. Italics indicate not implemented or incomplete.
+
+### compyle.serialize.pointer
+* ID: None
+
+This object is simply a placeholder object within compyle, used to keep track of where to write memory addresses.
+
+### *code object*
+* ID: 0 | Metadata: 0x000000
+* Structure:
+    * Pointer to bytecode
+    * Pointer to names
+    * Pointer to constants
+    * Pointer to name
+    * Pointer to filename
+
+All referenced objects are inserted in the binary elsewhere
+
+### *int*
+* ID: 1 | Metadata: number of blocks
+* Structure (per block):
+    * 32B of the raw, big endian two's compliment of the int value
+    * 4B pointer to next block, 0 if current block is last
+
+### *float*
+* ID: 2 | Metadata: 0x000000
+* Structure:
+    * 8B IEEE-754 double-precison float
+
+### *str*
+* ID: 3 | Metadata: number of blocks
+* Structure: (per block):
+    * 32B of the str object, UTF-8 encoded
+    * 4B pointer to next block, 0 if current block is last
+
+### *bytes*
+* ID: 4 | Metadata: number of blocks
+* Structure: (per block):
+    * 32B of the bytes object
+    * 4B pointer to next block, 0 if current block is last
+
+### *bool*
+* ID: 5 | Metadata: 0x000000 if False, else 0xFFFFFF
+* Structure: N/A - value is stored in header metadata
+
+### *tuple*
+* ID: 6 | Metadata:
+
+### *list*
+* ID: 7 | Metadata:
+
+### *dict*
+* ID: 8 | Metadata:
+
 
 # Boot sequence
 1. Copy `boot.spy` to memory and execute it
@@ -24,6 +68,7 @@ Code can be imported in many ways:
 * Executing raw (ER) import     - Performs a raw import, then executes the code object
 * Code (C) import               - Compiles the code to a code object, assuming a beginning address of 0, then adjusts pointers
 * Executing code (EC) import    - Performs a code import, then executes the code object
+
 A code import can performed with code from any source, so long as it's presented as a Python string. The `compile` function is used just like CPython's `compile` and is defined in `boot.py`. The `import <thing>` statement performs an ER import if `<thing>` is a corelib and and EC import if `<thing>` is not.
 
 **Use `__import__()` to implement the import mechanism**
@@ -45,31 +90,38 @@ Notes
 * `available` and `desired` always have greater/equal available as `sufficient`
 * `available` and `desired` always have difference available as `remaining`
 * `testing` and `desired` always have sum available as `split`
+
 ### State 0 (idle)
 * unhold the CPU
 * if `Ctrl_Alloc` active then go to state 1 else go to state 0
+
 ### State 1 (init)
 * hold CPU
 * latch desired block size into `desired`
 * copy `first` to `next`
 * latch 0 into `testing`    // Used when marking blocks after one is found
 * go to state 2
+
 ### State 2 (compare)
 * copy `testing` to `previous`
 * copy `next` to `testing`
 * read memory address `testing` into `available`
 * if `sufficient` then go to state 4, else go to state 3
+
 ### State 3 (walk)
 * read memory address `testing` + 4 into `next`
 * go to state 2
+
 ### State 4 (split block)
 * write memory address `split` as `remaining`
 * read memory address `testing` + 4 into `next`
 * write memory address `split` + 4 as `next`
 * if `previous` equals `first` then go to state 6, else go to state 5
+
 ### State 5 (redirect previous block)
 * write memory address `previous` + 4 as `next`     // Make the last block point to the block after this one, instead of pointing to this one
 * go to state 0
+
 ### State 6 (relocate first block)
 * read memory address `testing` + 4 into `first`
 * go to state 0
