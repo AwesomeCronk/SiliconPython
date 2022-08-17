@@ -1,0 +1,159 @@
+{
+    "numLines": 24,
+    "numStates": 8,
+    "numConditions": 8,
+
+    "lines": [
+        "Available_In",
+        "Available_Out",
+        "Desired_In",
+        "Desired_Out",
+        "Remaining_Out",
+        "First_In",
+        "First_Out",
+        "Previous_In",
+        "Previous_Out",
+        "Testing_In",
+        "Testing_Out",
+        "Split_Out",
+        "Next_In",
+        "Next_Out",
+        "Memory_Address",
+        "Memory_AddressOffset",
+        "Memory_Read",
+        "Memory_Write",
+        "CPU_Enable",
+        "",
+        "State_Set",
+        "State_0",
+        "State_1",
+        "State_2"
+    ],
+
+    "state_blank": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+    ],
+
+    "state_idle": [
+        [
+            ["CPU_Enable", "State_Set"],
+            ["State_Set", "State_0"],
+            ["CPU_Enable", "State_Set"],
+            ["State_Set", "State_0"],
+            ["CPU_Enable", "State_Set"],
+            ["State_Set", "State_0"],
+            ["CPU_Enable", "State_Set"],
+            ["State_Set", "State_0"]
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+    ],
+
+    "state_init": [
+        ["Desired_In"],
+        ["First_Out", "Next_In"],
+        ["Testing_In"],
+        ["State_Set", "State_1"],
+        [],
+        [],
+        [],
+        []
+    ],
+
+    "state_compare": [
+        ["Testing_Out", "Previous_In"],
+        ["Next_Out", "Testing_In"],
+        ["Testing_Out", "Memory_Address"],
+        ["Memory_Read", "Available_In"],
+        [
+            ["State_Set", "State_0", "State_1"],
+            ["State_Set", "State_0", "State_1"],
+            ["State_Set", "State_0", "State_1"],
+            ["State_Set", "State_0", "State_1"],
+            ["State_Set", "State_2"],
+            ["State_Set", "State_2"],
+            ["State_Set", "State_2"],
+            ["State_Set", "State_2"]
+        ],
+        [],
+        [],
+        []
+    ],
+
+    "state_walk": [
+        ["Testing_Out", "Memory_AddressOffset"],
+        ["Memory_Read", "Next_In"],
+        ["State_Set", "State_1"],
+        [],
+        [],
+        [],
+        [],
+        []
+    ],
+
+    "state_splitBlock": [
+        ["Split_Out", "Memory_Address"],
+        ["Memory_Write", "Remaining_Out"],
+        ["Testing_Out", "Memory_AddressOffset"],
+        ["Memory_Read", "Next_In"],
+        ["Split_Out", "Memory_AddressOffset"],
+        ["Memory_Write", "Next_Out"],
+        [
+            ["State_Set", "State_0", "State_2"],
+            ["State_Set", "State_0", "State_2"],
+            ["State_Set", "State_1", "State_2"],
+            ["State_Set", "State_1", "State_2"],
+            ["State_Set", "State_0", "State_2"],
+            ["State_Set", "State_0", "State_2"],
+            ["State_Set", "State_1", "State_2"],
+            ["State_Set", "State_1", "State_2"]
+        ],
+        []
+    ],
+
+    "state_redirectPreviousBlock": [
+        ["Previous_Out", "Memory_AddressOffset"],
+        ["Memory_Read", "Next_In"],
+        ["State_Set"],
+        [],
+        [],
+        [],
+        [],
+        []
+    ],
+
+    "state_relocateFirstBlock": [
+        ["Testing_Out", "Memory_AddressOffset"],
+        ["Memory_Read", "First_In"],
+        ["State_Set"],
+        [],
+        [],
+        [],
+        [],
+        []
+    ],
+
+
+    "states": [
+        "state_idle",
+        "state_init",
+        "state_compare",
+        "state_walk",
+        "state_splitBlock",
+        "state_redirectPreviousBlock",
+        "state_relocateFirstBlock",
+        "state_blank"
+    ]
+}

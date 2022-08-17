@@ -70,33 +70,25 @@
       <elementName>In</elementName>
       <elementAttributes>
         <entry>
-          <string>Label</string>
-          <string>Bus</string>
+          <string>Description</string>
+          <string>NEVER SET WHILE OTHER CTRL LINES ARE SET</string>
         </entry>
         <entry>
-          <string>Bits</string>
-          <int>32</int>
+          <string>Label</string>
+          <string>Ctrl_SetFirst</string>
         </entry>
       </elementAttributes>
-      <pos x="280" y="140"/>
+      <pos x="-560" y="20"/>
     </visualElement>
     <visualElement>
       <elementName>In</elementName>
       <elementAttributes>
         <entry>
-          <string>rotation</string>
-          <rotation rotation="2"/>
-        </entry>
-        <entry>
           <string>Label</string>
-          <string>MemDataIn</string>
-        </entry>
-        <entry>
-          <string>Bits</string>
-          <int>32</int>
+          <string>Clk</string>
         </entry>
       </elementAttributes>
-      <pos x="620" y="1300"/>
+      <pos x="-560" y="-20"/>
     </visualElement>
     <visualElement>
       <elementName>Driver</elementName>
@@ -132,10 +124,6 @@
       <elementName>ROM</elementName>
       <elementAttributes>
         <entry>
-          <string>bigEndian</string>
-          <boolean>true</boolean>
-        </entry>
-        <entry>
           <string>AddrBits</string>
           <int>9</int>
         </entry>
@@ -149,7 +137,7 @@
         </entry>
         <entry>
           <string>lastDataFile</string>
-          <file>/home/aweso/Source/Digital/SiliconPython/simulation/MMU-ucode.bin</file>
+          <file>/home/aweso/Source/Digital/SiliconPython/simulation/ucodeMMU.bin</file>
         </entry>
         <entry>
           <string>autoReload</string>
@@ -475,10 +463,14 @@
       <elementAttributes>
         <entry>
           <string>Label</string>
-          <string>Clk</string>
+          <string>Bus</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
         </entry>
       </elementAttributes>
-      <pos x="-560" y="-20"/>
+      <pos x="280" y="140"/>
     </visualElement>
     <visualElement>
       <elementName>VDD</elementName>
@@ -788,15 +780,19 @@
       <elementName>In</elementName>
       <elementAttributes>
         <entry>
-          <string>Label</string>
-          <string>Ctrl_SetFirst</string>
+          <string>rotation</string>
+          <rotation rotation="2"/>
         </entry>
         <entry>
-          <string>Description</string>
-          <string>NEVER SET WHILE OTHER CTRL LINES ARE SET</string>
+          <string>Label</string>
+          <string>MemDataIn</string>
+        </entry>
+        <entry>
+          <string>Bits</string>
+          <int>32</int>
         </entry>
       </elementAttributes>
-      <pos x="-560" y="20"/>
+      <pos x="620" y="1300"/>
     </visualElement>
     <visualElement>
       <elementName>Or</elementName>
