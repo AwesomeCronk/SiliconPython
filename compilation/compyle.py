@@ -3,7 +3,7 @@ from types import CodeType
 from dis import dis
 
 
-version = '0.1.0'
+version = '0.2.0'
 
 NoneType = type(None)
 
