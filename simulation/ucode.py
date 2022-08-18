@@ -1,10 +1,10 @@
-import argparse, json
+import argparse, json5
 
 def getArgs():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'jsonfile',
-        help='JSON file to read ucode structure from'
+        help='JSON5 file to read ucode structure from'
     )
     parser.add_argument(
         '-o',
@@ -23,7 +23,7 @@ def getArgs():
 
 if __name__ == '__main__':
     args = getArgs()
-    with open(args.jsonfile, 'r') as jsonfile: ucodeJSON = json.load(jsonfile)
+    with open(args.jsonfile, 'r') as jsonfile: ucodeJSON = json5.load(jsonfile)
     lines = ucodeJSON['lines']
     states = ucodeJSON['states']
     numLines = ucodeJSON['numLines']

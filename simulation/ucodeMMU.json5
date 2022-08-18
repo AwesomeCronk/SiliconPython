@@ -1,9 +1,9 @@
 {
-    "numLines": 24,
-    "numStates": 8,
-    "numConditions": 8,
+    numLines: 24,
+    numStates: 8,
+    numConditions: 8,
 
-    "lines": [
+    lines: [
         "Available_In",
         "Available_Out",
         "Desired_In",
@@ -30,7 +30,7 @@
         "State_2"
     ],
 
-    "state_blank": [
+    state_blank: [
         [],
         [],
         [],
@@ -41,7 +41,7 @@
         []
     ],
 
-    "state_idle": [
+    state_idle: [
         [
             ["CPU_Enable", "State_Set"],
             ["State_Set", "State_0"],
@@ -61,7 +61,7 @@
         []
     ],
 
-    "state_init": [
+    state_init: [
         ["Desired_In"],
         ["First_Out", "Next_In"],
         ["Testing_In"],
@@ -72,7 +72,7 @@
         []
     ],
 
-    "state_compare": [
+    state_compare: [
         ["Testing_Out", "Previous_In"],
         ["Next_Out", "Testing_In"],
         ["Testing_Out", "Memory_Address"],
@@ -92,7 +92,7 @@
         []
     ],
 
-    "state_walk": [
+    state_walk: [
         ["Testing_Out", "Memory_AddressOffset"],
         ["Memory_Read", "Next_In"],
         ["State_Set", "State_1"],
@@ -103,7 +103,7 @@
         []
     ],
 
-    "state_splitBlock": [
+    state_splitBlock: [
         ["Split_Out", "Memory_Address"],
         ["Memory_Write", "Remaining_Out"],
         ["Testing_Out", "Memory_AddressOffset"],
@@ -123,7 +123,7 @@
         []
     ],
 
-    "state_redirectPreviousBlock": [
+    state_redirectPreviousBlock: [
         ["Previous_Out", "Memory_AddressOffset"],
         ["Memory_Read", "Next_In"],
         ["State_Set"],
@@ -134,7 +134,7 @@
         []
     ],
 
-    "state_relocateFirstBlock": [
+    state_relocateFirstBlock: [
         ["Testing_Out", "Memory_AddressOffset"],
         ["Memory_Read", "First_In"],
         ["State_Set"],
@@ -146,7 +146,7 @@
     ],
 
 
-    "states": [
+    states: [
         "state_idle",
         "state_init",
         "state_compare",
