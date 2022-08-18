@@ -19,7 +19,7 @@ This object is simply a placeholder object within compyle, used to keep track of
 
 All referenced objects are inserted in the binary elsewhere
 
-### *int*
+### int
 * ID: 1 | Metadata: number of blocks
 * Structure (per block):
     * 32B of the raw, big endian two's compliment of the int value

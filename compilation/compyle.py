@@ -7,6 +7,15 @@ version = '0.1.0'
 
 NoneType = type(None)
 
+# Logging setup
+serializeLogger = logging.getLogger('serialize')
+serializeLogger.setLevel(logging.DEBUG)
+serializeHandler = logging.StreamHandler()
+serializeHandler.setLevel(logging.DEBUG)
+serializeFormatter = logging.Formatter('[%(levelname)s] %(name)s: %(message)s')
+serializeHandler.setFormatter(serializeFormatter)
+serializeLogger.addHandler(serializeHandler)
+
 
 def getArgs(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser()
@@ -48,6 +57,7 @@ def getArgs(argv=sys.argv[1:]):
     return parser.parse_args(argv)
 
 def serialize(object):
+    logger = logging.getLogger('serialize')
     typeIDs = [
         # Pointers have no type because they are not Python objects
         # They only exist when explicitly needed to facilitate more complex objects
@@ -64,15 +74,6 @@ def serialize(object):
         NoneType
     ]
     binary = b''
-
-    # Logging setup
-    logger = logging.getLogger('serialize')
-    logger.setLevel(logging.DEBUG)
-    handler = logging.StreamHandler()
-    handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('[%(levelname)s] %(name)s: %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
 
     class pointer():
         def __init__(self, value): assert value < 256 ** 4; self.value = value
@@ -113,20 +114,40 @@ def serialize(object):
 
             logger.info('Serialized {} at address 0x{:02X}'.format(CodeType, address))
 
-        elif isinstance(object, int):       # Complete
-            size = 4
-            while 256 ** size <= abs(object) * 2: size += 4
-            if size >= 256 ** 3: raise ValueError('Object of type \'int\' is too big')
-
-            cap = 256 ** size
-            compliment = (cap + abs(object)) % cap
-            intBinary = int.to_bytes(compliment, size, 'big')
-
+        elif isinstance(object, int):
             address = len(binary)
-            binary += intBinary
+
+            logger.debug('int: {}'.format(object))
+
+            # Calculate size of int (increases in 32B increments as blocks are added)
+            size = 32
+            while 256 ** size <= abs(object) * 2: size += 32
+            numBlocks = size // 32
+            # logger.debug('int has size {}B ({} blocks)'.format(size, numBlocks))
+            # Max size is 256^3 blocks
+            if size >= 32 * (256 ** 3): raise ValueError('Object of type \'int\' is too big')
+
+            # Calculate 2's compliment of integer
+            cap = 256 ** size
+            compliment = (cap + object) % cap
+            complimentBinary = int.to_bytes(compliment, size, 'big')
+            # logger.debug('compliment: {}, binary: {}'.format(compliment, complimentBinary))
+
+            # Create binary
+            binary += int.to_bytes(typeIDs.index(int), 1, 'big') + int.to_bytes(numBlocks, 3, 'big')
+            for i in range(numBlocks):
+                complimentBlock = complimentBinary[32 * i: 32 * (i + 1)]
+                # logger.debug('iterating block {}: {}'.format(i, complimentBlock))
+                binary += complimentBlock
+                
+                # Pointer to next block (comes right after this one)
+                if i + 1 < numBlocks: binary += int.to_bytes(len(binary), 4, 'big')
+                # Zero, since there's no next block to point to
+                else: binary += b'\x00\x00\x00\x00'
+
             logger.info('Serialized {} at address 0x{:02X}'.format(int, address))
 
-        elif isinstance(object, str):       # Complete
+        elif isinstance(object, str):
             strBinary = object.encode('utf-8')
             length = len(strBinary)
             if length >= 256 ** 4: raise ValueError('Object of type \'str\' is too big')
@@ -137,7 +158,7 @@ def serialize(object):
             binary += strBinary
             logger.info('Serialized {} at address 0x{:02X}'.format(str, address))
         
-        elif isinstance(object, tuple):     # Complete
+        elif isinstance(object, tuple):
             if len(object) >= 256 ** 4: raise ValueError('Object of type {} is too big'.format(tuple))
             tupleBinary = int.to_bytes(len(object), 4, 'big')
             for item in object:
