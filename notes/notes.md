@@ -19,35 +19,42 @@ This object is simply a placeholder object within compyle, used to keep track of
 
 All referenced objects are inserted in the binary elsewhere
 
+### bool
+* ID: 1 | Metadata: 0x000000 if False, else 0xFFFFFF
+* Structure: N/A - value is stored in header metadata
+
 ### int
-* ID: 1 | Metadata: number of blocks
+* ID: 2 | Metadata: number of blocks
 * Structure (per block):
-    * 32B of the raw, big endian two's compliment of the int value
+    * 16B of the raw, big endian two's compliment of the int value
     * 4B pointer to next block, 0 if current block is last
 
-### *float*
-* ID: 2 | Metadata: 0x000000
+### float
+* ID: 3 | Metadata: 0x000000
 * Structure:
     * 8B IEEE-754 double-precison float
 
-### *str*
-* ID: 3 | Metadata: number of blocks
+### str
+* ID: 4 | Metadata: number of blocks
 * Structure: (per block):
     * 32B of the str object, UTF-8 encoded
     * 4B pointer to next block, 0 if current block is last
 
-### *bytes*
-* ID: 4 | Metadata: number of blocks
+### bytes
+* ID: 5 | Metadata: number of blocks
 * Structure: (per block):
     * 32B of the bytes object
-    * 4B pointer to next block, 0 if current block is last
+    * 4B pointer to next block
 
-### *bool*
-* ID: 5 | Metadata: 0x000000 if False, else 0xFFFFFF
-* Structure: N/A - value is stored in header metadata
+The next block pointer in the last block is 0.
 
 ### *tuple*
-* ID: 6 | Metadata:
+* ID: 6 | Metadata: number of members
+* Structure (per block):
+    * 64B containing 16 pointers to member objects
+    * 4B pointer to next block
+
+The next block pointer in the last block is 0. Any extra pointers within a block also are 0.
 
 ### *list*
 * ID: 7 | Metadata:

@@ -1,4 +1,4 @@
-import argparse, logging, sys
+import argparse, logging, sys, struct
 from types import CodeType
 from dis import dis
 
@@ -63,11 +63,11 @@ def serialize(object):
         # They only exist when explicitly needed to facilitate more complex objects
         # pointer,
         CodeType,
+        bool,
         int,
         float,
         str,
         bytes,
-        bool,
         tuple,
         list,
         dict,
@@ -114,18 +114,25 @@ def serialize(object):
 
             logger.info('Serialized {} at address 0x{:02X}'.format(CodeType, address))
 
-        elif isinstance(object, int):
+        elif isinstance(object, bool):      # Complete
+            address = len(binary)
+            header = int.to_bytes(typeIDs.index(bool), 1, 'big') + (b'\xff\xff\xff' if object else b'\x00\x00\x00')
+            binary += header
+            logger.info('Serialized {} at address 0x{:02X}'.format(bool, address))
+
+        elif isinstance(object, int):       # Complete
             address = len(binary)
 
             logger.debug('int: {}'.format(object))
 
             # Calculate size of int (increases in 32B increments as blocks are added)
-            size = 32
-            while 256 ** size <= abs(object) * 2: size += 32
-            numBlocks = size // 32
+            blockSize = 16
+            size = blockSize
+            while 256 ** size <= abs(object) * 2: size += blockSize
+            numBlocks = size // blockSize
             # logger.debug('int has size {}B ({} blocks)'.format(size, numBlocks))
             # Max size is 256^3 blocks
-            if size >= 32 * (256 ** 3): raise ValueError('Object of type \'int\' is too big')
+            if size >= blockSize * (256 ** 3): raise ValueError('Object of type \'int\' is too big')
 
             # Calculate 2's compliment of integer
             cap = 256 ** size
@@ -136,7 +143,7 @@ def serialize(object):
             # Create binary
             binary += int.to_bytes(typeIDs.index(int), 1, 'big') + int.to_bytes(numBlocks, 3, 'big')
             for i in range(numBlocks):
-                complimentBlock = complimentBinary[32 * i: 32 * (i + 1)]
+                complimentBlock = complimentBinary[blockSize * i: blockSize * (i + 1)]
                 # logger.debug('iterating block {}: {}'.format(i, complimentBlock))
                 binary += complimentBlock
                 
@@ -147,16 +154,72 @@ def serialize(object):
 
             logger.info('Serialized {} at address 0x{:02X}'.format(int, address))
 
-        elif isinstance(object, str):
-            strBinary = object.encode('utf-8')
-            length = len(strBinary)
-            if length >= 256 ** 4: raise ValueError('Object of type \'str\' is too big')
-            strBinary += b'\x00' * (4 - (length % 4))
-            strBinary = int.to_bytes(length, 4, 'big') + strBinary
-
+        elif isinstance(object, float):     # Complete
             address = len(binary)
-            binary += strBinary
+
+            header = int.to_bytes(typeIDs.index(float), 1, 'big') + b'\x00\x00\x00'
+
+            binary += header
+            binary += struct.pack('!d', object)
+            logger.info('Serialized {} at address 0x{:02X}'.format(float, address))
+
+        elif isinstance(object, str):       # Complete
+            address = len(binary)
+
+            strBinary = object.encode('utf-8')
+            blockSize = 32
+            length = len(strBinary)
+            if length >= 256 ** 3: raise ValueError('Object of type \'str\' is too big')
+            
+            # Pad data so it lines up later
+            pad = length % blockSize
+            # If/else prevents adding a full empty block at the end
+            strBinary += b'\x00' * ((blockSize - pad) if pad != 0 else 0)
+            
+            header = int.to_bytes(typeIDs.index(str), 1, 'big') + int.to_bytes(length, 3, 'big')
+            binary += header
+
+            numBlocks = len(strBinary) // blockSize
+            for i in range(numBlocks):
+                strBlock = strBinary[blockSize * i:blockSize * (i + 1)]
+                binary += strBlock
+
+                # Pointer to next block (comes right after this one)
+                if i + 1 < numBlocks: binary += int.to_bytes(len(binary), 4, 'big')
+                # Zero, since there's no next block to point to
+                else: binary += b'\x00\x00\x00\x00'
+
+
             logger.info('Serialized {} at address 0x{:02X}'.format(str, address))
+
+        elif isinstance(object, bytes):     # Complete
+            address = len(binary)
+
+            bytesBinary = object
+            blockSize = 32
+            length = len(bytesBinary)
+            if length >= 256 ** 3: raise ValueError('Object of type \'bytes\' is too big')
+            
+            # Pad data so it lines up later
+            pad = length % blockSize
+            # If/else prevents adding a full empty block at the end
+            bytesBinary += b'\x00' * ((blockSize - pad) if pad != 0 else 0)
+            
+            header = int.to_bytes(typeIDs.index(bytes), 1, 'big') + int.to_bytes(length, 3, 'big')
+            binary += header
+
+            numBlocks = len(bytesBinary) // blockSize
+            for i in range(numBlocks):
+                bytesBlock = bytesBinary[blockSize * i:blockSize * (i + 1)]
+                binary += bytesBlock
+
+                # Pointer to next block (comes right after this one)
+                if i + 1 < numBlocks: binary += int.to_bytes(len(binary), 4, 'big')
+                # Zero, since there's no next block to point to
+                else: binary += b'\x00\x00\x00\x00'
+
+
+            logger.info('Serialized {} at address 0x{:02X}'.format(bytes, address))
         
         elif isinstance(object, tuple):
             if len(object) >= 256 ** 4: raise ValueError('Object of type {} is too big'.format(tuple))
