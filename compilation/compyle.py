@@ -3,7 +3,7 @@ from types import CodeType
 from dis import dis
 
 
-version = '0.2.0'
+version = '0.3.0'
 
 NoneType = type(None)
 
@@ -248,11 +248,9 @@ def serialize(object):
             
             logger.info('Serialized {} at address 0x{:02X}'.format(tuple, address))
 
-        elif isinstance(object, NoneType):
-            noneBinary = b'None'
-
+        elif isinstance(object, NoneType):  # Complete
             address = len(binary)
-            binary += noneBinary
+            binary += int.to_bytes(typeIDs.index(NoneType), 1, 'big') + b'\x00\x00\x00'
             logger.info('Serialized {} at address 0x{:02X}'.format(NoneType, address))
 
         else:

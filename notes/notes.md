@@ -64,6 +64,10 @@ The next block pointer in the last block is 0. Any extra pointers within a block
 ### *dict*
 * ID: 8 | Metadata:
 
+### NoneType
+* ID: 9 | Metadata: 0x000000
+* Structure: Empty
+
 
 # Boot sequence
 1. Copy `boot.spy` to memory and execute it
