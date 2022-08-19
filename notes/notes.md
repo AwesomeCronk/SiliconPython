@@ -3,6 +3,8 @@ All objects except `compyle.serialize.pointer`s (used internally by compyle) hav
 
 Supported types are listed below. Italics indicate not implemented or incomplete.
 
+Next block pointers will most often be 0 if the current block is last, but this may not always be the case.
+
 ### compyle.serialize.pointer
 * ID: None
 
@@ -48,10 +50,10 @@ All referenced objects are inserted in the binary elsewhere
 
 The next block pointer in the last block is 0.
 
-### *tuple*
-* ID: 6 | Metadata: number of members
+### tuple
+* ID: 6 | Metadata: number of items
 * Structure (per block):
-    * 64B containing 16 pointers to member objects
+    * 64B containing 16 pointers to items
     * 4B pointer to next block
 
 The next block pointer in the last block is 0. Any extra pointers within a block also are 0.

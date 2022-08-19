@@ -123,7 +123,7 @@ def serialize(object):
         elif isinstance(object, int):       # Complete
             address = len(binary)
 
-            logger.debug('int: {}'.format(object))
+            # logger.debug('int: {}'.format(object))
 
             # Calculate size of int (increases in 32B increments as blocks are added)
             blockSize = 16
@@ -221,15 +221,31 @@ def serialize(object):
 
             logger.info('Serialized {} at address 0x{:02X}'.format(bytes, address))
         
-        elif isinstance(object, tuple):
-            if len(object) >= 256 ** 4: raise ValueError('Object of type {} is too big'.format(tuple))
-            tupleBinary = int.to_bytes(len(object), 4, 'big')
-            for item in object:
-                itemAddress = addObject(item)
-                tupleBinary += int.to_bytes(itemAddress, 4, 'big')
-
+        elif isinstance(object, tuple):     # Complete
             address = len(binary)
-            binary += tupleBinary
+            header = int.to_bytes(typeIDs.index(tuple), 1, 'big') + int.to_bytes(len(object), 3, 'big')
+            binary += header
+
+            if len(object) >= 256 ** 3: raise ValueError('Object of type {} is too big'.format(tuple))
+            blockSize = 16  # Not bytes in this case, but items
+            pointers = []
+            
+            # Fill blocks
+            for i in range(len(object)):
+                if i and (i % blockSize == 0):
+                    binary += int.to_bytes(len(binary), 4, 'big')   # Pointer to next block
+                pointers.append(addObject(pointer(0)))
+
+            # Pad last block
+            pad = (blockSize - (len(object) % blockSize)) % blockSize
+            # logger.debug('pad {} pointers ({})'.format(pad, b'\x00\x00\x00\x00' * pad))
+            binary += b'\x00\x00\x00\x00' * pad
+            if pad: binary += b'\x00\x00\x00\x00'   # Next block pointer, for consistency's sake
+
+            # Add each item and edit the pointer to it
+            for i in range(len(object)):
+                editPointer(pointers[i], addObject(object[i]))
+            
             logger.info('Serialized {} at address 0x{:02X}'.format(tuple, address))
 
         elif isinstance(object, NoneType):
