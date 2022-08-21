@@ -28,6 +28,7 @@ if __name__ == '__main__':
     states = ucodeJSON['states']
     numLines = ucodeJSON['numLines']
     numStates = ucodeJSON['numStates']
+    numSteps = ucodeJSON['numSteps']
     numConditions = ucodeJSON['numConditions']
 
     if len(lines) != numLines: print('Line count {} is incorrect'.format(len(lines))); exit()
@@ -44,7 +45,12 @@ if __name__ == '__main__':
 
     binary = b''
     for i, state in enumerate(states):
-        if args.verbose: print('Processing state', i)
+        if args.verbose: print('Processing state {} ({})'.format(i, state))
+
+        # Allows states to leave off any steps which need not be specified
+        # If a state needs less steps than specified, it can define only what it needs and the rest will be filled in
+        while len(ucodeJSON[state]) < numSteps: ucodeJSON[state].append(ucodeJSON['defaultState'])
+
         for j, step in enumerate(ucodeJSON[state]):
             if args.verbose: print('Processing step {}: '.format(j), end='')
 

@@ -1,0 +1,666 @@
+// Instruction states are set by the instruction bytecode when Instruction_Exec gets thrown
+
+{
+    numLines: 32,
+    numStates: 256,
+    numSteps: 16,
+    numConditions: 16,
+
+    lines: [
+        "Ctrl_MemAddrIn",
+        "Ctrl_MemDataIn",
+        "Ctrl_MemDataOut",
+        "Ctrl_Alloc",
+        "Ctrl_Dealloc",
+        "Ctrl_SetFirstBlock",
+        "Ctrl_AllocOut",
+        "Ctrl_LoadInst",
+        "Ctrl_ExecInst",
+        "Ctrl_InvalidInst",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "Ctrl_BusMux0",
+        "Ctrl_BusMux1",
+        "Ctrl_InterfaceOut"
+    ],
+
+    defaultStep: [],
+
+    // Invalid instruction fill-in
+    INVALID: [
+        'Ctrl_InvalidInst',
+        'Ctrl_InvalidInst'
+    ],
+
+    // Instruction 00
+    STOP_CODE: [],
+
+    // Instruction 01
+    POP_TOP: [],
+
+    // Instruction 02
+    ROT_TWO: [],
+
+    // Instruction 03
+    ROT_THREE: [],
+
+    // Instruction 04
+    DUP_TOP: [],
+
+    // Instruction 05
+    ROT_FOUR: [],
+
+    // Instruction 09
+    NOP: [],
+
+    // Instruction 0A
+    UNARY_POSITIVE: [],
+
+    // Instruction 0B
+    UNARY_NEGATIVE: [],
+
+    // Instruction 0C
+    UNARY_NOT: [],
+
+    // Instruction 0D
+    UNARY_CONVERT: [],
+
+    // Instruction 0F
+    UNARY_INVERT: [],
+
+    // Instruction 13
+    BINARY_POWER: [],
+
+    // Instruction 14
+    BINARY_MULTIPLY: [],
+
+    // Instruction 15
+    BINARY_DIVIDE: [],
+
+    // Instruction 16
+    BINARY_MODULO: [],
+
+    // Instruction 17
+    BINARY_ADD: [],
+
+    // Instruction 18
+    BINARY_SUBTRACT: [],
+
+    // Instruction 19
+    BINARY_SUBSCR: [],
+
+    // Instruction 1A
+    BINARY_FLOOR_DIVIDE: [],
+
+    // Instruction 1B
+    BINARY_TRUE_DIVIDE: [],
+
+    // Instruction 1C
+    INPLACE_FLOOR_DIVIDE: [],
+
+    // Instruction 1D
+    INPLACE_TRUE_DIVIDE: [],
+
+    // Instruction 1E
+    "SLICE+0": [],
+
+    // Instruction 1F
+    "SLICE+1": [],
+
+    // Instruction 20
+    "SLICE+2": [],
+
+    // Instruction 21
+    "SLICE+3": [],
+
+    // Instruction 28
+    "STORE_SLICE+0": [],
+
+    // Instruction 29
+    "STORE_SLICE+1": [],
+
+    // Instruction 2A
+    "STORE_SLICE+2": [],
+
+    // Instruction 2B
+    "STORE_SLICE+3": [],
+
+    // Instruction 32
+    "DELETE_SLICE+0": [],
+
+    // Instruction 33
+    "DELETE_SLICE+1": [],
+
+    // Instruction 34
+    "DELETE_SLICE+2": [],
+
+    // Instruction 35
+    "DELETE_SLICE+3": [],
+
+    // Instruction 36
+    STORE_MAP: [],
+
+    // Instruction 37
+    INPLACE_ADD: [],
+
+    // Instruction 38
+    INPLACE_SUBTRACT: [],
+
+    // Instruction 39
+    INPLACE_MULTIPLY: [],
+
+    // Instruction 3A
+    INPLACE_DIVIDE: [],
+
+    // Instruction 3B
+    INPLACE_MODULO: [],
+
+    // Instruction 3C
+    STORE_SUBSCR: [],
+
+    // Instruction 3D
+    DELETE_SUBSCR: [],
+
+    // Instruction 3E
+    BINARY_LSHIFT: [],
+
+    // Instruction 3F
+    BINARY_RSHIFT: [],
+
+    // Instruction 40
+    BINARY_AND: [],
+
+    // Instruction 41
+    BINARY_XOR: [],
+
+    // Instruction 42
+    BINARY_OR: [],
+
+    // Instruction 43
+    INPLACE_POWER: [],
+
+    // Instruction 44
+    GET_ITER: [],
+
+    // Instruction 46
+    PRINT_EXPR: [],
+
+    // Instruction 47
+    PRINT_ITEM: [],
+
+    // Instruction 48
+    PRINT_NEWLINE: [],
+
+    // Instruction 49
+    PRINT_ITEM_TO: [],
+
+    // Instruction 4A
+    PRINT_NEWLINE_TO: [],
+
+    // Instruction 4B
+    INPLACE_LSHIFT: [],
+
+    // Instruction 4C
+    INPLACE_RSHIFT: [],
+
+    // Instruction 4D
+    INPLACE_AND: [],
+
+    // Instruction 4E
+    INPLACE_XOR: [],
+
+    // Instruction 4F
+    INPLACE_OR: [],
+
+    // Instruction 50
+    BREAK_LOOP: [],
+
+    // Instruction 51
+    WITH_CLEANUP: [],
+
+    // Instruction 52
+    LOAD_LOCALS: [],
+
+    // Instruction 53
+    RETURN_VALUE: [],
+
+    // Instruction 54
+    IMPORT_STAR: [],
+
+    // Instruction 55
+    EXEC_STMT: [],
+
+    // Instruction 56
+    YIELD_VALUE: [],
+
+    // Instruction 57
+    POP_BLOCK: [],
+
+    // Instruction 58
+    END_FINALLY: [],
+
+    // Instruction 59
+    BUILD_CLASS: [],
+
+    // Instruction 5A
+    STORE_NAME: [],
+
+    // Instruction 5B
+    DELETE_NAME: [],
+
+    // Instruction 5C
+    UNPACK_SEQUENCE: [],
+
+    // Instruction 5D
+    FOR_ITER: [],
+
+    // Instruction 5E
+    LIST_APPEND: [],
+
+    // Instruction 5F
+    STORE_ATTR: [],
+
+    // Instruction 60
+    DELETE_ATTR: [],
+
+    // Instruction 61
+    STORE_GLOBAL: [],
+
+    // Instruction 62
+    DELETE_GLOBAL: [],
+
+    // Instruction 63
+    DUP_TOPX: [],
+
+    // Instruction 64
+    LOAD_CONST: [],
+
+    // Instruction 65
+    LOAD_NAME: [],
+
+    // Instruction 66
+    BUILD_TUPLE: [],
+
+    // Instruction 67
+    BUILD_LIST: [],
+
+    // Instruction 68
+    BUILD_SET: [],
+
+    // Instruction 69
+    BUILD_MAP: [],
+
+    // Instruction 6A
+    LOAD_ATTR: [],
+
+    // Instruction 6B
+    COMPARE_OP: [],
+
+    // Instruction 6C
+    IMPORT_NAME: [],
+
+    // Instruction 6D
+    IMPORT_FROM: [],
+
+    // Instruction 6E
+    JUMP_FORWARD: [],
+
+    // Instruction 6F
+    JUMP_IF_FALSE_OR_POP: [],
+
+    // Instruction 70
+    JUMP_IF_TRUE_OR_POP: [],
+
+    // Instruction 71
+    JUMP_ABSOLUTE: [],
+
+    // Instruction 72
+    POP_JUMP_IF_FALSE: [],
+
+    // Instruction 73
+    POP_JUMP_IF_TRUE: [],
+
+    // Instruction 74
+    LOAD_GLOBAL: [],
+
+    // Instruction 77
+    CONTINUE_LOOP: [],
+
+    // Instruction 78
+    SETUP_LOOP: [],
+
+    // Instruction 79
+    SETUP_EXCEPT: [],
+
+    // Instruction 7A
+    SETUP_FINALLY: [],
+
+    // Instruction 7C
+    LOAD_FAST: [],
+
+    // Instruction 7D
+    STORE_FAST: [],
+
+    // Instruction 7E
+    DELETE_FAST: [],
+
+    // Instruction 82
+    RAISE_VARARGS: [],
+
+    // Instruction 83
+    CALL_FUNCTION: [],
+
+    // Instruction 84
+    MAKE_FUNCTION: [],
+
+    // Instruction 85
+    BUILD_SLICE: [],
+
+    // Instruction 86
+    MAKE_CLOSURE: [],
+
+    // Instruction 87
+    LOAD_CLOSURE: [],
+
+    // Instruction 88
+    LOAD_DEREF: [],
+
+    // Instruction 89
+    STORE_DEREF: [],
+
+    // Instruction 8C
+    CALL_FUNCTION_VAR: [],
+
+    // Instruction 8D
+    CALL_FUNCTION_KW: [],
+
+    // Instruction 8E
+    CALL_FUNCTION_VAR_KW: [],
+
+    // Instruction 8F
+    SETUP_WITH: [],
+
+    // Instruction 91
+    EXTENDED_ARG: [],
+
+    // Instruction 92
+    SET_ADD: [],
+
+    // Instruction 93
+    MAP_ADD: [],
+
+    states: [
+        "STOP_CODE",
+        "POP_TOP",
+        "ROT_TWO",
+        "ROT_THREE",
+        "DUP_TOP",
+        "ROT_FOUR",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "NOP",
+        "UNARY_POSITIVE",
+        "UNARY_NEGATIVE",
+        "UNARY_NOT",
+        "UNARY_CONVERT",
+        "INVALID",
+        "UNARY_INVERT",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "BINARY_POWER",
+        "BINARY_MULTIPLY",
+        "BINARY_DIVIDE",
+        "BINARY_MODULO",
+        "BINARY_ADD",
+        "BINARY_SUBTRACT",
+        "BINARY_SUBSCR",
+        "BINARY_FLOOR_DIVIDE",
+        "BINARY_TRUE_DIVIDE",
+        "INPLACE_FLOOR_DIVIDE",
+        "INPLACE_TRUE_DIVIDE",
+        "SLICE+0",
+        "SLICE+1",
+        "SLICE+2",
+        "SLICE+3",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "STORE_SLICE+0",
+        "STORE_SLICE+1",
+        "STORE_SLICE+2",
+        "STORE_SLICE+3",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "DELETE_SLICE+0",
+        "DELETE_SLICE+1",
+        "DELETE_SLICE+2",
+        "DELETE_SLICE+3",
+        "STORE_MAP",
+        "INPLACE_ADD",
+        "INPLACE_SUBTRACT",
+        "INPLACE_MULTIPLY",
+        "INPLACE_DIVIDE",
+        "INPLACE_MODULO",
+        "STORE_SUBSCR",
+        "DELETE_SUBSCR",
+        "BINARY_LSHIFT",
+        "BINARY_RSHIFT",
+        "BINARY_AND",
+        "BINARY_XOR",
+        "BINARY_OR",
+        "INPLACE_POWER",
+        "GET_ITER",
+        "INVALID",
+        "PRINT_EXPR",
+        "PRINT_ITEM",
+        "PRINT_NEWLINE",
+        "PRINT_ITEM_TO",
+        "PRINT_NEWLINE_TO",
+        "INPLACE_LSHIFT",
+        "INPLACE_RSHIFT",
+        "INPLACE_AND",
+        "INPLACE_XOR",
+        "INPLACE_OR",
+        "BREAK_LOOP",
+        "WITH_CLEANUP",
+        "LOAD_LOCALS",
+        "RETURN_VALUE",
+        "IMPORT_STAR",
+        "EXEC_STMT",
+        "YIELD_VALUE",
+        "POP_BLOCK",
+        "END_FINALLY",
+        "BUILD_CLASS",
+        "STORE_NAME",
+        "DELETE_NAME",
+        "UNPACK_SEQUENCE",
+        "FOR_ITER",
+        "LIST_APPEND",
+        "STORE_ATTR",
+        "DELETE_ATTR",
+        "STORE_GLOBAL",
+        "DELETE_GLOBAL",
+        "DUP_TOPX",
+        "LOAD_CONST",
+        "LOAD_NAME",
+        "BUILD_TUPLE",
+        "BUILD_LIST",
+        "BUILD_SET",
+        "BUILD_MAP",
+        "LOAD_ATTR",
+        "COMPARE_OP",
+        "IMPORT_NAME",
+        "IMPORT_FROM",
+        "JUMP_FORWARD",
+        "JUMP_IF_FALSE_OR_POP",
+        "JUMP_IF_TRUE_OR_POP",
+        "JUMP_ABSOLUTE",
+        "POP_JUMP_IF_FALSE",
+        "POP_JUMP_IF_TRUE",
+        "LOAD_GLOBAL",
+        "INVALID",
+        "INVALID",
+        "CONTINUE_LOOP",
+        "SETUP_LOOP",
+        "SETUP_EXCEPT",
+        "SETUP_FINALLY",
+        "INVALID",
+        "LOAD_FAST",
+        "STORE_FAST",
+        "DELETE_FAST",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "RAISE_VARARGS",
+        "CALL_FUNCTION",
+        "MAKE_FUNCTION",
+        "BUILD_SLICE",
+        "MAKE_CLOSURE",
+        "LOAD_CLOSURE",
+        "LOAD_DEREF",
+        "STORE_DEREF",
+        "INVALID",
+        "INVALID",
+        "CALL_FUNCTION_VAR",
+        "CALL_FUNCTION_KW",
+        "CALL_FUNCTION_VAR_KW",
+        "SETUP_WITH",
+        "INVALID",
+        "EXTENDED_ARG",
+        "SET_ADD",
+        "MAP_ADD",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID",
+        "INVALID"
+    ]

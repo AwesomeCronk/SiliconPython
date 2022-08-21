@@ -1,9 +1,9 @@
 {
-    "numLines": 32,
-    "numStates": 1,
-    "numConditions": 1,
+    numLines: 32,
+    numStates: 1,
+    numConditions: 1,
 
-    "lines": [
+    lines: [
         "Ctrl_MemAddrIn",
         "Ctrl_MemDataIn",
         "Ctrl_MemDataOut",
@@ -38,7 +38,7 @@
         "Ctrl_InterfaceOut"
     ],
 
-    "state_boot": [
+    state_boot: [
         [],
         [],
         [],
@@ -57,5 +57,5 @@
         []
     ],
 
-    "states": ["state_boot"]
+    states: ["state_boot"]
 }
