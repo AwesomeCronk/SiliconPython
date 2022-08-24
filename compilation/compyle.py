@@ -3,7 +3,7 @@ from types import CodeType
 from dis import dis
 
 
-version = '0.3.0'
+version = '0.3.1'
 
 NoneType = type(None)
 
@@ -91,7 +91,7 @@ def serialize(object):
 
             address = len(binary)
             binary += pointerBinary
-            logger.info('Serialized {} at address 0x{:02X}'.format(pointer, address))
+            logger.info('Serialized <pointer> at 0x{:02X}'.format(address))
 
         elif isinstance(object, CodeType):
             # Generate a byte string to represent the object, appending any references to other objects to `objects`
@@ -112,13 +112,13 @@ def serialize(object):
             editPointer(namePointer, addObject(object.co_name))
             editPointer(filenamePointer, addObject(object.co_filename))
 
-            logger.info('Serialized {} at address 0x{:02X}'.format(CodeType, address))
+            logger.info('Serialized <CodeType> at 0x{:02X}'.format(address))
 
         elif isinstance(object, bool):      # Complete
             address = len(binary)
             header = int.to_bytes(typeIDs.index(bool), 1, 'big') + (b'\xff\xff\xff' if object else b'\x00\x00\x00')
             binary += header
-            logger.info('Serialized {} at address 0x{:02X}'.format(bool, address))
+            logger.info('Serialized <bool> at 0x{:02X}'.format(address))
 
         elif isinstance(object, int):       # Complete
             address = len(binary)
@@ -152,7 +152,7 @@ def serialize(object):
                 # Zero, since there's no next block to point to
                 else: binary += b'\x00\x00\x00\x00'
 
-            logger.info('Serialized {} at address 0x{:02X}'.format(int, address))
+            logger.info('Serialized <int> at 0x{:02X}'.format(address))
 
         elif isinstance(object, float):     # Complete
             address = len(binary)
@@ -161,7 +161,7 @@ def serialize(object):
 
             binary += header
             binary += struct.pack('!d', object)
-            logger.info('Serialized {} at address 0x{:02X}'.format(float, address))
+            logger.info('Serialized <float> at 0x{:02X}'.format(address))
 
         elif isinstance(object, str):       # Complete
             address = len(binary)
@@ -190,7 +190,7 @@ def serialize(object):
                 else: binary += b'\x00\x00\x00\x00'
 
 
-            logger.info('Serialized {} at address 0x{:02X}'.format(str, address))
+            logger.info('Serialized <str> at 0x{:02X}'.format(address))
 
         elif isinstance(object, bytes):     # Complete
             address = len(binary)
@@ -219,7 +219,7 @@ def serialize(object):
                 else: binary += b'\x00\x00\x00\x00'
 
 
-            logger.info('Serialized {} at address 0x{:02X}'.format(bytes, address))
+            logger.info('Serialized <bytes> at 0x{:02X}'.format(address))
         
         elif isinstance(object, tuple):     # Complete
             address = len(binary)
@@ -246,12 +246,12 @@ def serialize(object):
             for i in range(len(object)):
                 editPointer(pointers[i], addObject(object[i]))
             
-            logger.info('Serialized {} at address 0x{:02X}'.format(tuple, address))
+            logger.info('Serialized <tuple> at 0x{:02X}'.format(address))
 
         elif isinstance(object, NoneType):  # Complete
             address = len(binary)
             binary += int.to_bytes(typeIDs.index(NoneType), 1, 'big') + b'\x00\x00\x00'
-            logger.info('Serialized {} at address 0x{:02X}'.format(NoneType, address))
+            logger.info('Serialized <NoneType> at 0x{:02X}'.format(address))
 
         else:
             raise TypeError('Unsupported type: {}'.format(type(object)))
