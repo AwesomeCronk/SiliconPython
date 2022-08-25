@@ -124,6 +124,10 @@
       <elementName>ROM</elementName>
       <elementAttributes>
         <entry>
+          <string>bigEndian</string>
+          <boolean>true</boolean>
+        </entry>
+        <entry>
           <string>AddrBits</string>
           <int>9</int>
         </entry>

@@ -7,47 +7,43 @@
     numConditions: 16,
 
     lines: [
-        "Ctrl_MemAddrIn",
-        "Ctrl_MemDataIn",
-        "Ctrl_MemDataOut",
-        "Ctrl_Alloc",
-        "Ctrl_Dealloc",
-        "Ctrl_SetFirstBlock",
-        "Ctrl_AllocOut",
-        "Ctrl_LoadInst",
-        "Ctrl_ExecInst",
-        "Ctrl_InvalidInst",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "Ctrl_BusMux0",
-        "Ctrl_BusMux1",
-        "Ctrl_InterfaceOut"
+        'Ctrl_MemAddrIn',
+        'Ctrl_MemDataIn',
+        'Ctrl_MemDataOut',
+        'Ctrl_Alloc',
+        'Ctrl_Dealloc',
+        'Ctrl_SetFirstBlock',
+        'Ctrl_AllocOut',
+        'Ctrl_LoadInst',
+        'Ctrl_ExecInst',
+        'Ctrl_PCInc',
+        'Ctrl_PCIn',
+        'Ctrl_PCOut',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        'Ctrl_BusMux0',
+        'Ctrl_BusMux1',
+        'Ctrl_InterfaceOut',
+        'Ctrl_ExecEn',
+        'Ctrl_Halt',
+        'State_Set',
+        'State_0',
+        'State_1',
+        'State_2',
+        'State_3',
+        'State_4',
+        'State_5',
+        'State_6',
+        'State_7'
     ],
 
     defaultStep: [],
 
-    // Invalid instruction fill-in
-    INVALID: [
-        'Ctrl_InvalidInst',
-        'Ctrl_InvalidInst'
-    ],
+    blank: [],
 
     // Instruction 00
     STOP_CODE: [],
@@ -119,40 +115,40 @@
     INPLACE_TRUE_DIVIDE: [],
 
     // Instruction 1E
-    "SLICE+0": [],
+    'SLICE+0': [],
 
     // Instruction 1F
-    "SLICE+1": [],
+    'SLICE+1': [],
 
     // Instruction 20
-    "SLICE+2": [],
+    'SLICE+2': [],
 
     // Instruction 21
-    "SLICE+3": [],
+    'SLICE+3': [],
 
     // Instruction 28
-    "STORE_SLICE+0": [],
+    'STORE_SLICE+0': [],
 
     // Instruction 29
-    "STORE_SLICE+1": [],
+    'STORE_SLICE+1': [],
 
     // Instruction 2A
-    "STORE_SLICE+2": [],
+    'STORE_SLICE+2': [],
 
     // Instruction 2B
-    "STORE_SLICE+3": [],
+    'STORE_SLICE+3': [],
 
     // Instruction 32
-    "DELETE_SLICE+0": [],
+    'DELETE_SLICE+0': [],
 
     // Instruction 33
-    "DELETE_SLICE+1": [],
+    'DELETE_SLICE+1': [],
 
     // Instruction 34
-    "DELETE_SLICE+2": [],
+    'DELETE_SLICE+2': [],
 
     // Instruction 35
-    "DELETE_SLICE+3": [],
+    'DELETE_SLICE+3': [],
 
     // Instruction 36
     STORE_MAP: [],
@@ -406,261 +402,294 @@
     // Instruction 93
     MAP_ADD: [],
 
+
+    // Catch point to ensure that _loadInstr can be run starting at step 0
+    _beginRunning: [
+        ['State_Set>>_loadInstr'],
+        ['State_Set>>_loadInstr'],
+        ['State_Set>>_loadInstr'],
+        ['State_Set>>_loadInstr'],
+        ['State_Set>>_loadInstr'],
+        ['State_Set>>_loadInstr'],
+        ['State_Set>>_loadInstr'],
+        ['State_Set>>_loadInstr'],
+        ['State_Set>>_loadInstr'],
+        ['State_Set>>_loadInstr'],
+        ['State_Set>>_loadInstr'],
+        ['State_Set>>_loadInstr'],
+        ['State_Set>>_loadInstr'],
+        ['State_Set>>_loadInstr'],
+        ['State_Set>>_loadInstr'],
+        ['State_Set>>_loadInstr']
+    ],
+
+    // Load an instruction
+    _loadInstr: [
+
+    ],
+
+
+    // OPCODE_NAME - Python bytecode entry points
+    // OPCODE_NAME-helper_name - helper or conditional states for bytecode execution
+    // builtin_name - entry points for calling hardware builtins
+    // builtin_name-helper_name - helper or conditional states for builtin calling
+    // _stateName - general management states not necessarily associated with an opcode
     states: [
-        "STOP_CODE",
-        "POP_TOP",
-        "ROT_TWO",
-        "ROT_THREE",
-        "DUP_TOP",
-        "ROT_FOUR",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "NOP",
-        "UNARY_POSITIVE",
-        "UNARY_NEGATIVE",
-        "UNARY_NOT",
-        "UNARY_CONVERT",
-        "INVALID",
-        "UNARY_INVERT",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "BINARY_POWER",
-        "BINARY_MULTIPLY",
-        "BINARY_DIVIDE",
-        "BINARY_MODULO",
-        "BINARY_ADD",
-        "BINARY_SUBTRACT",
-        "BINARY_SUBSCR",
-        "BINARY_FLOOR_DIVIDE",
-        "BINARY_TRUE_DIVIDE",
-        "INPLACE_FLOOR_DIVIDE",
-        "INPLACE_TRUE_DIVIDE",
-        "SLICE+0",
-        "SLICE+1",
-        "SLICE+2",
-        "SLICE+3",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "STORE_SLICE+0",
-        "STORE_SLICE+1",
-        "STORE_SLICE+2",
-        "STORE_SLICE+3",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "DELETE_SLICE+0",
-        "DELETE_SLICE+1",
-        "DELETE_SLICE+2",
-        "DELETE_SLICE+3",
-        "STORE_MAP",
-        "INPLACE_ADD",
-        "INPLACE_SUBTRACT",
-        "INPLACE_MULTIPLY",
-        "INPLACE_DIVIDE",
-        "INPLACE_MODULO",
-        "STORE_SUBSCR",
-        "DELETE_SUBSCR",
-        "BINARY_LSHIFT",
-        "BINARY_RSHIFT",
-        "BINARY_AND",
-        "BINARY_XOR",
-        "BINARY_OR",
-        "INPLACE_POWER",
-        "GET_ITER",
-        "INVALID",
-        "PRINT_EXPR",
-        "PRINT_ITEM",
-        "PRINT_NEWLINE",
-        "PRINT_ITEM_TO",
-        "PRINT_NEWLINE_TO",
-        "INPLACE_LSHIFT",
-        "INPLACE_RSHIFT",
-        "INPLACE_AND",
-        "INPLACE_XOR",
-        "INPLACE_OR",
-        "BREAK_LOOP",
-        "WITH_CLEANUP",
-        "LOAD_LOCALS",
-        "RETURN_VALUE",
-        "IMPORT_STAR",
-        "EXEC_STMT",
-        "YIELD_VALUE",
-        "POP_BLOCK",
-        "END_FINALLY",
-        "BUILD_CLASS",
-        "STORE_NAME",
-        "DELETE_NAME",
-        "UNPACK_SEQUENCE",
-        "FOR_ITER",
-        "LIST_APPEND",
-        "STORE_ATTR",
-        "DELETE_ATTR",
-        "STORE_GLOBAL",
-        "DELETE_GLOBAL",
-        "DUP_TOPX",
-        "LOAD_CONST",
-        "LOAD_NAME",
-        "BUILD_TUPLE",
-        "BUILD_LIST",
-        "BUILD_SET",
-        "BUILD_MAP",
-        "LOAD_ATTR",
-        "COMPARE_OP",
-        "IMPORT_NAME",
-        "IMPORT_FROM",
-        "JUMP_FORWARD",
-        "JUMP_IF_FALSE_OR_POP",
-        "JUMP_IF_TRUE_OR_POP",
-        "JUMP_ABSOLUTE",
-        "POP_JUMP_IF_FALSE",
-        "POP_JUMP_IF_TRUE",
-        "LOAD_GLOBAL",
-        "INVALID",
-        "INVALID",
-        "CONTINUE_LOOP",
-        "SETUP_LOOP",
-        "SETUP_EXCEPT",
-        "SETUP_FINALLY",
-        "INVALID",
-        "LOAD_FAST",
-        "STORE_FAST",
-        "DELETE_FAST",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "RAISE_VARARGS",
-        "CALL_FUNCTION",
-        "MAKE_FUNCTION",
-        "BUILD_SLICE",
-        "MAKE_CLOSURE",
-        "LOAD_CLOSURE",
-        "LOAD_DEREF",
-        "STORE_DEREF",
-        "INVALID",
-        "INVALID",
-        "CALL_FUNCTION_VAR",
-        "CALL_FUNCTION_KW",
-        "CALL_FUNCTION_VAR_KW",
-        "SETUP_WITH",
-        "INVALID",
-        "EXTENDED_ARG",
-        "SET_ADD",
-        "MAP_ADD",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID",
-        "INVALID"
+        'STOP_CODE',    // DO NOT CHANGE
+        'POP_TOP',      // DO NOT CHANGE
+        'ROT_TWO',      // DO NOT CHANGE
+        'ROT_THREE',    // DO NOT CHANGE
+        'DUP_TOP',      // DO NOT CHANGE
+        'ROT_FOUR',     // DO NOT CHANGE
+        'blank',
+        'blank',
+        'blank',
+        'NOP',              // DO NOT CHANGE
+        'UNARY_POSITIVE',   // DO NOT CHANGE
+        'UNARY_NEGATIVE',   // DO NOT CHANGE
+        'UNARY_NOT',        // DO NOT CHANGE
+        'UNARY_CONVERT',    // DO NOT CHANGE
+        'blank',
+        'UNARY_INVERT',     // DO NOT CHANGE
+        'blank',
+        'blank',
+        'blank',
+        'BINARY_POWER',         // DO NOT CHANGE
+        'BINARY_MULTIPLY',      // DO NOT CHANGE
+        'BINARY_DIVIDE',        // DO NOT CHANGE
+        'BINARY_MODULO',        // DO NOT CHANGE
+        'BINARY_ADD',           // DO NOT CHANGE
+        'BINARY_SUBTRACT',      // DO NOT CHANGE
+        'BINARY_SUBSCR',        // DO NOT CHANGE
+        'BINARY_FLOOR_DIVIDE',  // DO NOT CHANGE
+        'BINARY_TRUE_DIVIDE',   // DO NOT CHANGE
+        'INPLACE_FLOOR_DIVIDE', // DO NOT CHANGE
+        'INPLACE_TRUE_DIVIDE',  // DO NOT CHANGE
+        'SLICE+0',              // DO NOT CHANGE
+        'SLICE+1',              // DO NOT CHANGE
+        'SLICE+2',              // DO NOT CHANGE
+        'SLICE+3',              // DO NOT CHANGE
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'STORE_SLICE+0',        // DO NOT CHANGE
+        'STORE_SLICE+1',        // DO NOT CHANGE
+        'STORE_SLICE+2',        // DO NOT CHANGE
+        'STORE_SLICE+3',        // DO NOT CHANGE
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'DELETE_SLICE+0',       // DO NOT CHANGE
+        'DELETE_SLICE+1',       // DO NOT CHANGE
+        'DELETE_SLICE+2',       // DO NOT CHANGE
+        'DELETE_SLICE+3',       // DO NOT CHANGE
+        'STORE_MAP',            // DO NOT CHANGE
+        'INPLACE_ADD',          // DO NOT CHANGE
+        'INPLACE_SUBTRACT',     // DO NOT CHANGE
+        'INPLACE_MULTIPLY',     // DO NOT CHANGE
+        'INPLACE_DIVIDE',       // DO NOT CHANGE
+        'INPLACE_MODULO',       // DO NOT CHANGE
+        'STORE_SUBSCR',         // DO NOT CHANGE
+        'DELETE_SUBSCR',        // DO NOT CHANGE
+        'BINARY_LSHIFT',        // DO NOT CHANGE
+        'BINARY_RSHIFT',        // DO NOT CHANGE
+        'BINARY_AND',           // DO NOT CHANGE
+        'BINARY_XOR',           // DO NOT CHANGE
+        'BINARY_OR',            // DO NOT CHANGE
+        'INPLACE_POWER',        // DO NOT CHANGE
+        'GET_ITER',             // DO NOT CHANGE
+        'blank',
+        'PRINT_EXPR',           // DO NOT CHANGE
+        'PRINT_ITEM',           // DO NOT CHANGE
+        'PRINT_NEWLINE',        // DO NOT CHANGE
+        'PRINT_ITEM_TO',        // DO NOT CHANGE
+        'PRINT_NEWLINE_TO',     // DO NOT CHANGE
+        'INPLACE_LSHIFT',       // DO NOT CHANGE
+        'INPLACE_RSHIFT',       // DO NOT CHANGE
+        'INPLACE_AND',          // DO NOT CHANGE
+        'INPLACE_XOR',          // DO NOT CHANGE
+        'INPLACE_OR',           // DO NOT CHANGE
+        'BREAK_LOOP',           // DO NOT CHANGE
+        'WITH_CLEANUP',         // DO NOT CHANGE
+        'LOAD_LOCALS',          // DO NOT CHANGE
+        'RETURN_VALUE',         // DO NOT CHANGE
+        'IMPORT_STAR',          // DO NOT CHANGE
+        'EXEC_STMT',            // DO NOT CHANGE
+        'YIELD_VALUE',          // DO NOT CHANGE
+        'POP_BLOCK',            // DO NOT CHANGE
+        'END_FINALLY',          // DO NOT CHANGE
+        'BUILD_CLASS',          // DO NOT CHANGE
+        'STORE_NAME',           // DO NOT CHANGE
+        'DELETE_NAME',          // DO NOT CHANGE
+        'UNPACK_SEQUENCE',      // DO NOT CHANGE
+        'FOR_ITER',             // DO NOT CHANGE
+        'LIST_APPEND',          // DO NOT CHANGE
+        'STORE_ATTR',           // DO NOT CHANGE
+        'DELETE_ATTR',          // DO NOT CHANGE
+        'STORE_GLOBAL',         // DO NOT CHANGE
+        'DELETE_GLOBAL',        // DO NOT CHANGE
+        'DUP_TOPX',             // DO NOT CHANGE
+        'LOAD_CONST',           // DO NOT CHANGE
+        'LOAD_NAME',            // DO NOT CHANGE
+        'BUILD_TUPLE',          // DO NOT CHANGE
+        'BUILD_LIST',           // DO NOT CHANGE
+        'BUILD_SET',            // DO NOT CHANGE
+        'BUILD_MAP',            // DO NOT CHANGE
+        'LOAD_ATTR',            // DO NOT CHANGE
+        'COMPARE_OP',           // DO NOT CHANGE
+        'IMPORT_NAME',          // DO NOT CHANGE
+        'IMPORT_FROM',          // DO NOT CHANGE
+        'JUMP_FORWARD',         // DO NOT CHANGE
+        'JUMP_IF_FALSE_OR_POP', // DO NOT CHANGE
+        'JUMP_IF_TRUE_OR_POP',  // DO NOT CHANGE
+        'JUMP_ABSOLUTE',        // DO NOT CHANGE
+        'POP_JUMP_IF_FALSE',    // DO NOT CHANGE
+        'POP_JUMP_IF_TRUE',     // DO NOT CHANGE
+        'LOAD_GLOBAL',          // DO NOT CHANGE
+        'blank',
+        'blank',
+        'CONTINUE_LOOP',    // DO NOT CHANGE
+        'SETUP_LOOP',       // DO NOT CHANGE
+        'SETUP_EXCEPT',     // DO NOT CHANGE
+        'SETUP_FINALLY',    // DO NOT CHANGE
+        'blank',
+        'LOAD_FAST',    // DO NOT CHANGE
+        'STORE_FAST',   // DO NOT CHANGE
+        'DELETE_FAST',  // DO NOT CHANGE
+        'blank',
+        'blank',
+        'blank',
+        'RAISE_VARARGS',    // DO NOT CHANGE
+        'CALL_FUNCTION',    // DO NOT CHANGE
+        'MAKE_FUNCTION',    // DO NOT CHANGE
+        'BUILD_SLICE',      // DO NOT CHANGE
+        'MAKE_CLOSURE',     // DO NOT CHANGE
+        'LOAD_CLOSURE',     // DO NOT CHANGE
+        'LOAD_DEREF',       // DO NOT CHANGE
+        'STORE_DEREF',      // DO NOT CHANGE
+        'blank',
+        'blank',
+        'CALL_FUNCTION_VAR',    // DO NOT CHANGE
+        'CALL_FUNCTION_KW',     // DO NOT CHANGE
+        'CALL_FUNCTION_VAR_KW', // DO NOT CHANGE
+        'SETUP_WITH',           // DO NOT CHANGE
+        'blank',
+        'EXTENDED_ARG',     // DO NOT CHANGE
+        'SET_ADD',          // DO NOT CHANGE
+        'MAP_ADD',          // DO NOT CHANGE
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        'blank',
+        '_loadInstr',
+        '_beginRunning'
     ]
+}

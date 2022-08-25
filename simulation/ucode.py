@@ -16,7 +16,8 @@ def getArgs():
         '-v',
         '--verbose',
         help='Enable verbose output',
-        action='store_true'
+        type=int,
+        default=0
     )
 
     return parser.parse_args()
@@ -34,7 +35,7 @@ if __name__ == '__main__':
     if len(lines) != numLines: print('Line count {} is incorrect'.format(len(lines))); exit()
     if len(states) != numStates: print('State count {} is incorrect'.format(len(states))); exit()
     for s, state in enumerate(states):
-        if len(ucodeJSON[state]) != 2 ** 3: print('Step count {} for state {} is incorrect'.format(len(ucodeJSON[state]), s)); exit()
+        if len(ucodeJSON[state]) > numSteps : print('Too many steps ({}) for state {}'.format(len(ucodeJSON[state]), s)); exit()
 
     def encodeStep(step):
         bits = [0] * len(lines)
@@ -63,27 +64,27 @@ if __name__ == '__main__':
 
     binary = b''
     for i, state in enumerate(states):
-        if args.verbose: print('Processing state {} ({})'.format(i, state))
+        if args.verbose >= 1: print('Processing state {} ({})'.format(i, state))
 
         # Allows states to leave off any steps which need not be specified
         # If a state needs less steps than specified, it can define only what it needs and the rest will be filled in
-        while len(ucodeJSON[state]) < numSteps: ucodeJSON[state].append(ucodeJSON['defaultState'])
+        while len(ucodeJSON[state]) < numSteps: ucodeJSON[state].append(ucodeJSON['defaultStep'])
 
         for j, step in enumerate(ucodeJSON[state]):
-            if args.verbose: print('Processing step {}: '.format(j), end='')
+            if args.verbose >= 2: print('Processing step {}: '.format(j), end='')
 
             # Steps can be a list of lines and be constant
             # or can be a list of lists of lines and be conditional
             if len(step) == 0:
-                if args.verbose: print('blank')
+                if args.verbose >= 2: print('blank')
                 binary = binary + b'\x00' * ((len(lines) // 8) * numConditions)
             elif isinstance(step[0], list):
-                if args.verbose: print('conditional')
+                if args.verbose >= 2: print('conditional')
                 assert len(step) == numConditions
                 for k, conditional in enumerate(step):
                     binary = binary + encodeStep(conditional)
             else:
-                if args.verbose: print('constant')
+                if args.verbose >= 2: print('constant')
                 for k in range(numConditions):
                     binary = binary + encodeStep(step)
 
