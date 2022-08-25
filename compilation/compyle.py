@@ -3,7 +3,7 @@ from types import CodeType
 from dis import dis
 
 
-version = '0.3.1'
+version = '0.4.0'
 
 NoneType = type(None)
 
@@ -80,7 +80,8 @@ def serialize(object):
 
     def editPointer(address, target):
         nonlocal binary
-        binary = binary[0:address] + int.to_bytes(target, 4, 'big') + binary[address + 4:]
+        # `address * 4` is because SiliconPython uses 32 bit words, so incrementing the address by one increments by 4 bytes
+        binary = binary[0:address * 4] + int.to_bytes(target, 4, 'big') + binary[(address + 1) * 4:]
 
     def addObject(object):
         # nonlocal objects
@@ -89,13 +90,13 @@ def serialize(object):
         if isinstance(object, pointer):     # Complete
             pointerBinary = int.to_bytes(object.value, 4, 'big')
 
-            address = len(binary)
+            address = len(binary) // 4
             binary += pointerBinary
-            logger.info('Serialized <pointer> at 0x{:02X}'.format(address))
+            logger.info('Serialized <pointer> at 0x{:08X}'.format(address))
 
         elif isinstance(object, CodeType):
             # Generate a byte string to represent the object, appending any references to other objects to `objects`
-            address = len(binary)
+            address = len(binary) // 4
             codeBinaryHeader = int.to_bytes(typeIDs.index(CodeType), 1, 'big') + b'spy'
             binary += codeBinaryHeader
 
@@ -105,23 +106,23 @@ def serialize(object):
             namePointer = addObject(pointer(0))
             filenamePointer = addObject(pointer(0))
             
-            editPointer(codePointer, len(binary))
+            editPointer(codePointer, len(binary) // 4)
             binary += object.co_code
             editPointer(namesPointer, addObject(object.co_names))
             editPointer(constantsPointer, addObject(object.co_consts))
             editPointer(namePointer, addObject(object.co_name))
             editPointer(filenamePointer, addObject(object.co_filename))
 
-            logger.info('Serialized <CodeType> at 0x{:02X}'.format(address))
+            logger.info('Serialized <CodeType> at 0x{:08X}'.format(address))
 
         elif isinstance(object, bool):      # Complete
-            address = len(binary)
+            address = len(binary) // 4
             header = int.to_bytes(typeIDs.index(bool), 1, 'big') + (b'\xff\xff\xff' if object else b'\x00\x00\x00')
             binary += header
-            logger.info('Serialized <bool> at 0x{:02X}'.format(address))
+            logger.info('Serialized <bool> at 0x{:08X}'.format(address))
 
         elif isinstance(object, int):       # Complete
-            address = len(binary)
+            address = len(binary) // 4
 
             # logger.debug('int: {}'.format(object))
 
@@ -148,23 +149,23 @@ def serialize(object):
                 binary += complimentBlock
                 
                 # Pointer to next block (comes right after this one)
-                if i + 1 < numBlocks: binary += int.to_bytes(len(binary), 4, 'big')
+                if i + 1 < numBlocks: binary += int.to_bytes(len(binary) // 4, 4, 'big')
                 # Zero, since there's no next block to point to
                 else: binary += b'\x00\x00\x00\x00'
 
-            logger.info('Serialized <int> at 0x{:02X}'.format(address))
+            logger.info('Serialized <int> at 0x{:08X}'.format(address))
 
         elif isinstance(object, float):     # Complete
-            address = len(binary)
+            address = len(binary) // 4
 
             header = int.to_bytes(typeIDs.index(float), 1, 'big') + b'\x00\x00\x00'
 
             binary += header
             binary += struct.pack('!d', object)
-            logger.info('Serialized <float> at 0x{:02X}'.format(address))
+            logger.info('Serialized <float> at 0x{:08X}'.format(address))
 
         elif isinstance(object, str):       # Complete
-            address = len(binary)
+            address = len(binary) // 4
 
             strBinary = object.encode('utf-8')
             blockSize = 32
@@ -185,15 +186,15 @@ def serialize(object):
                 binary += strBlock
 
                 # Pointer to next block (comes right after this one)
-                if i + 1 < numBlocks: binary += int.to_bytes(len(binary), 4, 'big')
+                if i + 1 < numBlocks: binary += int.to_bytes(len(binary) // 4, 4, 'big')
                 # Zero, since there's no next block to point to
                 else: binary += b'\x00\x00\x00\x00'
 
 
-            logger.info('Serialized <str> at 0x{:02X}'.format(address))
+            logger.info('Serialized <str> at 0x{:08X}'.format(address))
 
         elif isinstance(object, bytes):     # Complete
-            address = len(binary)
+            address = len(binary) // 4
 
             bytesBinary = object
             blockSize = 32
@@ -214,15 +215,15 @@ def serialize(object):
                 binary += bytesBlock
 
                 # Pointer to next block (comes right after this one)
-                if i + 1 < numBlocks: binary += int.to_bytes(len(binary), 4, 'big')
+                if i + 1 < numBlocks: binary += int.to_bytes(len(binary) // 4, 4, 'big')
                 # Zero, since there's no next block to point to
                 else: binary += b'\x00\x00\x00\x00'
 
 
-            logger.info('Serialized <bytes> at 0x{:02X}'.format(address))
+            logger.info('Serialized <bytes> at 0x{:08X}'.format(address))
         
         elif isinstance(object, tuple):     # Complete
-            address = len(binary)
+            address = len(binary) // 4
             header = int.to_bytes(typeIDs.index(tuple), 1, 'big') + int.to_bytes(len(object), 3, 'big')
             binary += header
 
@@ -233,7 +234,7 @@ def serialize(object):
             # Fill blocks
             for i in range(len(object)):
                 if i and (i % blockSize == 0):
-                    binary += int.to_bytes(len(binary), 4, 'big')   # Pointer to next block
+                    binary += int.to_bytes(len(binary) // 4, 4, 'big')   # Pointer to next block
                 pointers.append(addObject(pointer(0)))
 
             # Pad last block
@@ -246,12 +247,12 @@ def serialize(object):
             for i in range(len(object)):
                 editPointer(pointers[i], addObject(object[i]))
             
-            logger.info('Serialized <tuple> at 0x{:02X}'.format(address))
+            logger.info('Serialized <tuple> at 0x{:08X}'.format(address))
 
         elif isinstance(object, NoneType):  # Complete
-            address = len(binary)
+            address = len(binary) // 4
             binary += int.to_bytes(typeIDs.index(NoneType), 1, 'big') + b'\x00\x00\x00'
-            logger.info('Serialized <NoneType> at 0x{:02X}'.format(address))
+            logger.info('Serialized <NoneType> at 0x{:08X}'.format(address))
 
         else:
             raise TypeError('Unsupported type: {}'.format(type(object)))
