@@ -43,7 +43,7 @@ if __name__ == '__main__':
         # Easier way of doing a Set_State operation
         # Requires that State_Set and State_0..State_# be available
         if len(step) == 1 and step[0][0:11] == 'State_Set>>':
-            # print('Processing quick state change')
+            # print('Quick state change')
             stateName = step[0][11:]
             stateNum = states.index(stateName)
             binStr = bin(stateNum)[2:].zfill(len(bin(numStates)[2:]))
@@ -64,14 +64,14 @@ if __name__ == '__main__':
 
     binary = b''
     for i, state in enumerate(states):
-        if args.verbose >= 1: print('Processing state {} ({})'.format(i, state))
+        if args.verbose >= 1: print('State {}: {}'.format(i, state))
 
         # Allows states to leave off any steps which need not be specified
         # If a state needs less steps than specified, it can define only what it needs and the rest will be filled in
         while len(ucodeJSON[state]) < numSteps: ucodeJSON[state].append(ucodeJSON['defaultStep'])
 
         for j, step in enumerate(ucodeJSON[state]):
-            if args.verbose >= 2: print('Processing step {}: '.format(j), end='')
+            if args.verbose >= 2: print('  Step {}: '.format(j), end='')
 
             # Steps can be a list of lines and be constant
             # or can be a list of lists of lines and be conditional

@@ -403,7 +403,7 @@
     MAP_ADD: [],
 
 
-    // Catch point to ensure that _loadInstr can be run starting at step 0
+    // Catch point to start in a known state (boot sequencer switches control at potentially any arbitrary step)
     _beginRunning: [
         ['State_Set>>_loadInstr'],
         ['State_Set>>_loadInstr'],
