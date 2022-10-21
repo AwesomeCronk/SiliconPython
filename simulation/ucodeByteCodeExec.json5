@@ -1,4 +1,4 @@
-// Instruction states are set by the instruction bytecode when Instruction_Exec gets thrown
+// Instruction states are set by the Instruction bytecode when Instruction_Exec gets thrown
 
 {
     numLines: 32,
@@ -405,27 +405,46 @@
 
     // Catch point to start in a known state (boot sequencer switches control at potentially any arbitrary step)
     _beginRunning: [
-        ['State_Set>>_loadInstr'],
-        ['State_Set>>_loadInstr'],
-        ['State_Set>>_loadInstr'],
-        ['State_Set>>_loadInstr'],
-        ['State_Set>>_loadInstr'],
-        ['State_Set>>_loadInstr'],
-        ['State_Set>>_loadInstr'],
-        ['State_Set>>_loadInstr'],
-        ['State_Set>>_loadInstr'],
-        ['State_Set>>_loadInstr'],
-        ['State_Set>>_loadInstr'],
-        ['State_Set>>_loadInstr'],
-        ['State_Set>>_loadInstr'],
-        ['State_Set>>_loadInstr'],
-        ['State_Set>>_loadInstr'],
-        ['State_Set>>_loadInstr']
+        ['State_Set>>_loadInst'],
+        ['State_Set>>_loadInst'],
+        ['State_Set>>_loadInst'],
+        ['State_Set>>_loadInst'],
+        ['State_Set>>_loadInst'],
+        ['State_Set>>_loadInst'],
+        ['State_Set>>_loadInst'],
+        ['State_Set>>_loadInst'],
+        ['State_Set>>_loadInst'],
+        ['State_Set>>_loadInst'],
+        ['State_Set>>_loadInst'],
+        ['State_Set>>_loadInst'],
+        ['State_Set>>_loadInst'],
+        ['State_Set>>_loadInst'],
+        ['State_Set>>_loadInst'],
+        ['State_Set>>_loadInst']
     ],
 
-    // Load an instruction
-    _loadInstr: [
-
+    // Load an Instruction
+    _loadInst: [
+        ['Ctrl_PCOut', 'Ctrl_MemAddrIn'],
+        [
+            ['Ctrl_MemDataOut', 'Ctrl_LoadInst'],
+            ['Ctrl_MemDataOut', 'Ctrl_LoadInst', 'Ctrl_BusMux1'],   // Bus mux CDAB
+            ['Ctrl_MemDataOut', 'Ctrl_LoadInst'],
+            ['Ctrl_MemDataOut', 'Ctrl_LoadInst', 'Ctrl_BusMux1'],   // Bus mux CDAB
+            ['Ctrl_MemDataOut', 'Ctrl_LoadInst'],
+            ['Ctrl_MemDataOut', 'Ctrl_LoadInst', 'Ctrl_BusMux1'],   // Bus mux CDAB
+            ['Ctrl_MemDataOut', 'Ctrl_LoadInst'],
+            ['Ctrl_MemDataOut', 'Ctrl_LoadInst', 'Ctrl_BusMux1'],   // Bus mux CDAB
+            ['Ctrl_MemDataOut', 'Ctrl_LoadInst'],
+            ['Ctrl_MemDataOut', 'Ctrl_LoadInst', 'Ctrl_BusMux1'],   // Bus mux CDAB
+            ['Ctrl_MemDataOut', 'Ctrl_LoadInst'],
+            ['Ctrl_MemDataOut', 'Ctrl_LoadInst', 'Ctrl_BusMux1'],   // Bus mux CDAB
+            ['Ctrl_MemDataOut', 'Ctrl_LoadInst'],
+            ['Ctrl_MemDataOut', 'Ctrl_LoadInst', 'Ctrl_BusMux1'],   // Bus mux CDAB
+            ['Ctrl_MemDataOut', 'Ctrl_LoadInst'],
+            ['Ctrl_MemDataOut', 'Ctrl_LoadInst', 'Ctrl_BusMux1'],   // Bus mux CDAB
+        ],
+        ['Ctrl_ExecInst']
     ],
 
 
@@ -689,7 +708,7 @@
         'blank',
         'blank',
         'blank',
-        '_loadInstr',
+        '_loadInst',
         '_beginRunning'
     ]
 }
