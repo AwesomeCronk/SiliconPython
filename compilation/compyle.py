@@ -148,7 +148,7 @@ def serialize(object):
                 # logger.debug('iterating block {}: {}'.format(i, complimentBlock))
                 binary += complimentBlock
                 
-                # Pointer to next block (comes right after this one)
+                # Pointer to next block (comes right after this one because Compyle assumes clean memory)
                 if i + 1 < numBlocks: binary += int.to_bytes(len(binary) // 4, 4, 'big')
                 # Zero, since there's no next block to point to
                 else: binary += b'\x00\x00\x00\x00'
@@ -228,7 +228,26 @@ def serialize(object):
             binary += header
 
             if len(object) >= 256 ** 3: raise ValueError('Object of type {} is too big'.format(tuple))
-            blockSize = 16  # Not bytes in this case, but items
+            
+            pointers = []
+            
+            # Allocate pointers
+            for i in range(len(object)):
+                pointers.append(addObject(pointer(0)))
+
+            # Add each item and edit the pointer to it
+            for i, o in enumerate(object):
+                editPointer(pointers[i], addObject(o))
+            
+            logger.info('Serialized <tuple> at 0x{:08X}'.format(address))
+
+        elif isinstance(object, list):
+            address = len(binary) // 4
+            header = int.to_bytes(typeIDs.index(list), 1, 'big') + int.to_bytes(len(object), 3, 'big')
+            binary += header
+
+            if len(object) >= 256 ** 3: raise ValueError('Object of type {} is too big'.format(tuple))
+            blockSize = 8  # Not bytes in this case, but items
             pointers = []
             
             # Fill blocks
@@ -247,7 +266,7 @@ def serialize(object):
             for i in range(len(object)):
                 editPointer(pointers[i], addObject(object[i]))
             
-            logger.info('Serialized <tuple> at 0x{:08X}'.format(address))
+            logger.info('Serialized <list> at 0x{:08X}'.format(address))
 
         elif isinstance(object, NoneType):  # Complete
             address = len(binary) // 4
@@ -261,6 +280,28 @@ def serialize(object):
 
     addObject(object) # Begin the recursive serialization process
     return binary
+
+def hexdump(binary):
+    chars = "................................ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~................................................................................................................................."
+    disp = ''
+    addr = 0
+    while True:
+        line = binary[addr:addr + 16]
+        text = ''
+        if line == b'': break
+        if disp != '': disp += '\n'
+        disp += '{:08X}  '.format(addr // 4)  # addr // 4 gives word addresses
+
+        for b, byte in enumerate(line):   # Note that byte is an int when you iterate bytes
+            disp += '{:02X} '.format(byte)
+            text += chars[byte]
+            if b % 4 == 3: disp += ' '
+
+        disp += ' ' * (4 - (b // 4))
+        for i in range(15 - b): disp += '   '
+        disp += '|{}|'.format(text)
+        addr += 16
+    print(disp)
 
 def main():
     args = getArgs()
@@ -307,26 +348,7 @@ def main():
         outFile.write(binary)
 
     if args.hexdump:
-        chars = "................................ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~................................................................................................................................."
-        disp = 'Hexdump of .pyc:\n'
-        addr = 0
-        while True:
-            line = binary[addr:addr + 16]
-            text = ''
-            disp += hex(addr)[2:].zfill(8) + '  '
-            if line == b'': break
-
-            for b, byte in enumerate(line):   # Note that byte is an int when you iterate bytes
-                disp += hex(byte)[2:].zfill(2) + ' '
-                text += chars[byte]
-                if b == 7: disp += ' '
-
-            if b < 8: disp += ' '
-            for i in range(15 - b): disp += '   '
-            disp += ' |' + text + '|\n'
-            addr += 16
-        disp += '\n'
-        print(disp)
+        hexdump(binary)
 
     units = ('B', 'kB', 'MB', 'GB', 'TB', 'PB')
     selectedUnit = 0

@@ -37,14 +37,14 @@ All referenced objects are inserted in the binary elsewhere
     * 8B IEEE-754 double-precison float
 
 ### str
-* ID: 4 | Metadata: number of blocks
-* Structure: (per block):
+* ID: 4 | Metadata: number of characters
+* Structure (per block):
     * 32B of the str object, UTF-8 encoded
     * 4B pointer to next block, 0 if current block is last
 
 ### bytes
-* ID: 5 | Metadata: number of blocks
-* Structure: (per block):
+* ID: 5 | Metadata: number of bytes
+* Structure (per block):
     * 32B of the bytes object
     * 4B pointer to next block
 
@@ -52,14 +52,17 @@ The next block pointer in the last block is 0.
 
 ### tuple
 * ID: 6 | Metadata: number of items
+* Structure:
+    * 4B pointer to items * number of items
+
+### list
+* ID: 7 | Metadata: number of items
 * Structure (per block):
-    * 64B containing 16 pointers to items
+    * 32B of 4B pointers to items
     * 4B pointer to next block
 
-The next block pointer in the last block is 0. Any extra pointers within a block also are 0.
+The next block pointer in the last block is 0. The first block is immediately following the header.
 
-### *list*
-* ID: 7 | Metadata:
 
 ### *dict*
 * ID: 8 | Metadata:
