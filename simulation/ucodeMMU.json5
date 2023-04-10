@@ -1,10 +1,10 @@
 {
-    numLines: 24,
-    numStates: 8,
-    numSteps: 8,
-    numConditions: 8,
+    NumControlLines: 24,
+    NumConditionLines: 3,
+    NumStates: 8,
+    NumSteps: 8,
 
-    lines: [
+    ControlLines: [
         'Available_In',
         'Available_Out',
         'Desired_In',
@@ -26,98 +26,88 @@
         'CPU_Enable',
         '',
         'State_Set',
-        'State_0',
+        'State_2',
         'State_1',
-        'State_2'
+        'State_0'
     ],
 
-    defaultStep: [],
-
-    state_blank: [],
-
-    state_idle: [
-        [
-            ['CPU_Enable', 'State_Set'],
-            ['State_Set>>state_init'],
-            ['CPU_Enable', 'State_Set'],
-            ['State_Set>>state_init'],
-            ['CPU_Enable', 'State_Set'],
-            ['State_Set>>state_init'],
-            ['CPU_Enable', 'State_Set'],
-            ['State_Set>>state_init']
-        ]
+    ConditionLines: [
+        'Sufficient',
+        'PreviousIsFirst',
+        'Ctrl_Alloc'
     ],
 
-    state_init: [
-        ['Desired_In'],
-        ['First_Out', 'Next_In'],
-        ['Testing_In'],
-        ['State_Set>>state_compare'],
-    ],
+    DefaultStep: [],
 
-    state_compare: [
-        ['Testing_Out', 'Previous_In'],
-        ['Next_Out', 'Testing_In'],
-        ['Testing_Out', 'Memory_Address'],
-        ['Memory_Read', 'Available_In'],
-        [
-            ['State_Set>>state_walk'],
-            ['State_Set>>state_walk'],
-            ['State_Set>>state_walk'],
-            ['State_Set>>state_walk'],
-            ['State_Set>>state_splitBlock'],
-            ['State_Set>>state_splitBlock'],
-            ['State_Set>>state_splitBlock'],
-            ['State_Set>>state_splitBlock']
-        ]
-    ],
+    States:
+    {
+        blank: [],
 
-    state_walk: [
-        ['Testing_Out', 'Memory_AddressOffset'],
-        ['Memory_Read', 'Next_In'],
-        ['State_Set>>state_compare']
-    ],
+        Idle: [
+            {
+                'Ctrl_Alloc': ['/SetState:Init'],
+                '': ['CPU_Enable', 'State_Set']     // `State_Set` keeps the step at 0
+            }
+        ],
 
-    state_splitBlock: [
-        ['Split_Out', 'Memory_Address'],
-        ['Memory_Write', 'Remaining_Out'],
-        ['Testing_Out', 'Memory_AddressOffset'],
-        ['Memory_Read', 'Next_In'],
-        ['Split_Out', 'Memory_AddressOffset'],
-        ['Memory_Write', 'Next_Out'],
-        [
-            ['State_Set>>state_redirectPreviousBlock'],
-            ['State_Set>>state_redirectPreviousBlock'],
-            ['State_Set>>state_relocateFirstBlock'],
-            ['State_Set>>state_relocateFirstBlock'],
-            ['State_Set>>state_redirectPreviousBlock'],
-            ['State_Set>>state_redirectPreviousBlock'],
-            ['State_Set>>state_relocateFirstBlock'],
-            ['State_Set>>state_relocateFirstBlock']
-        ]
-    ],
+        Init: [
+            ['Desired_In'],
+            ['First_Out', 'Next_In'],
+            ['Testing_In'],
+            ['/SetState:Compare'],
+        ],
 
-    state_redirectPreviousBlock: [
-        ['Previous_Out', 'Memory_AddressOffset'],
-        ['Memory_Read', 'Next_In'],
-        ['State_Set>>state_idle']
-    ],
+        Compare: [
+            ['Testing_Out', 'Previous_In'],
+            ['Next_Out', 'Testing_In'],
+            ['Testing_Out', 'Memory_Address'],
+            ['Memory_Read', 'Available_In'],
+            {
+                'Sufficient': ['/SetState:SplitBlock'],
+                '': ['/SetState:Walk']
+            }
+        ],
 
-    state_relocateFirstBlock: [
-        ['Testing_Out', 'Memory_AddressOffset'],
-        ['Memory_Read', 'First_In'],
-        ['State_Set>>state_idle']
-    ],
+        Walk: [
+            ['Testing_Out', 'Memory_AddressOffset'],
+            ['Memory_Read', 'Next_In'],
+            ['/SetState:Compare']
+        ],
 
+        SplitBlock: [
+            ['Split_Out', 'Memory_Address'],
+            ['Memory_Write', 'Remaining_Out'],
+            ['Testing_Out', 'Memory_AddressOffset'],
+            ['Memory_Read', 'Next_In'],
+            ['Split_Out', 'Memory_AddressOffset'],
+            ['Memory_Write', 'Next_Out'],
+            {
+                'PreviousIsFirst': ['/SetState:RelocateFirstBlock'],
+                '': ['/SetState:RedirectPreviousBlock']
+            }
+        ],
 
-    states: [
-        'state_idle',
-        'state_init',
-        'state_compare',
-        'state_walk',
-        'state_splitBlock',
-        'state_redirectPreviousBlock',
-        'state_relocateFirstBlock',
-        'state_blank'
+        RedirectPreviousBlock: [
+            ['Previous_Out', 'Memory_AddressOffset'],
+            ['Memory_Read', 'Next_In'],
+            ['/SetState:Idle']
+        ],
+
+        RelocateFirstBlock: [
+            ['Testing_Out', 'Memory_AddressOffset'],
+            ['Memory_Read', 'First_In'],
+            ['/SetState:Idle']
+        ],
+    },
+
+    StateOrder: [
+        'Idle',
+        'Init',
+        'Compare',
+        'Walk',
+        'SplitBlock',
+        'RedirectPreviousBlock',
+        'RelocateFirstBlock',
+        'blank'
     ]
 }
